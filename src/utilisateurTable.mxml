@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="utilisateurTable_script.as" />
+<mx:Script source="utilisateur_script.as" />
+<mx:Script source="utilisateur_script_table.as" />
+
+<!-- Fomat nombre -->
+<mx:NumberFormatter thousandsSeparatorTo=" " thousandsSeparatorFrom=" " id="numberFormatter" precision="2" rounding="up"/>
+
+<!-- Fomat date -->
+<mx:DateFormatter formatString="DD/MM/YYYY" id="dateFormatter" />
+
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restutilisateurList" url="utilisateurList.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="initDG();">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+<profil>{search_combo_profil.text}</profil>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restutilisateurRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, Pour suppression de la fiche -->
+<mx:HTTPService id="restDelete" showBusyCursor="true" />
+
+<mx:HTTPService id="restVue" showBusyCursor="true"/>
+
+
+<!-- HTTP SERVICE, Pour exporter la table -->
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restutilisateurList_export" url="utilisateurList_export.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<profil>{search_combo_profil.text}</profil>
+
+</mx:request>
+</mx:HTTPService>
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restutilisateurUpdate" url="utilisateurUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<creation_par>{text_creation_par.text}</creation_par>
+<login>{text_login.text}</login>
+<date_creation>{date_date_creation.text}</date_creation>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<password>{text_password.text}</password>
+<modification_par>{text_modification_par.text}</modification_par>
+<date_modification>{date_date_modification.text}</date_modification>
+<cle>{text_cle.text}</cle>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<profil>{combo_profil.text}</profil>
+<annee>{combo_annee.text}</annee>
+<subordonnes>{text_subordonnes.text}</subordonnes>
+
+</mx:request>
+</mx:HTTPService>
+
+
+
+
+
+<!-- HTTP SERVICE LOV-->
+		
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+			
+	</mx:dataProvider>
+</mx:ComboBox>
+<mx:Label text="profil" /><mx:ComboBox id="search_combo_profil" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>USER</mx:String>
+<mx:String>ADMIN</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchutilisateur()"/>
+<mx:Label text="Filtre" />
+<!--
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+
+	</mx:dataProvider>			
+</mx:ComboBox>
+-->
+
+<mx:ComboBox id="combo_filtre" width="100%" dataProvider="{restVue.lastResult.vueList.item}" labelField="intitule" />
+
+<mx:Button label="Afficher" click="searchutilisateur()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+<mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Supprimer" />
+	<menuitem label="Exporter vers Excel" />
+</mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+
+<mx:VDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid_utilisateur" width="100%" height="100%" dataProvider="{restutilisateurList.lastResult.utilisateurList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" 
+	doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_utilisateur" displayItemsExpanded="true">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="login" dataField="login"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="subordonnes" dataField="subordonnes"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="password" dataField="password"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="profil" dataField="profil"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="idutilisateur" dataField="idutilisateur"  visible="true" />
+
+	</mx:columns>
+		<mx:rendererProviders>
+		<mx:AdvancedDataGridRendererProvider
+			dataField="summary"
+			columnIndex="3"
+			columnSpan="0"
+			renderer="renderers.SummaryText" />
+	</mx:rendererProviders>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="false" width="0%" height="0%">
+	<mx:TabNavigator id="tab_utilisateur" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_utilisateur_Principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_login" label="login" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_login" width="95%" text="{restutilisateurRead.lastResult.utilisateurRead.item.login}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_password" label="password" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_password" width="95%" text="{restutilisateurRead.lastResult.utilisateurRead.item.password}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_cle" label="cle" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_cle" width="95%" text="{restutilisateurRead.lastResult.utilisateurRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_profil" label="profil" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_profil" width="95%" text="{restutilisateurRead.lastResult.utilisateurRead.item.profil}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>USER</mx:String>
+<mx:String>ADMIN</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_subordonnes" label="subordonnes" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_subordonnes" width="95%" text="{restutilisateurRead.lastResult.utilisateurRead.item.subordonnes}"  />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_utilisateur_System" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_idutilisateur" label="idutilisateur" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idutilisateur" width="95%" text="{restutilisateurRead.lastResult.utilisateurRead.item.idutilisateur}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_date_creation" label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restutilisateurRead.lastResult.utilisateurRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_creation" label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restutilisateurRead.lastResult.utilisateurRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_date_modification" label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restutilisateurRead.lastResult.utilisateurRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_modification" label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restutilisateurRead.lastResult.utilisateurRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_annee" label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restutilisateurRead.lastResult.utilisateurRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011
+2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_creation_par" label="Création par" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restutilisateurRead.lastResult.utilisateurRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem id="formitem_modification_par" label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restutilisateurRead.lastResult.utilisateurRead.item.modification_par}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:VDividedBox>
+
+<mx:HBox width="100%" height="20" backgroundColor="#F2F2F2" paddingLeft="2" 
+	paddingTop="2" paddingRight="2" paddingBottom="2" textAlign="right"
+	backgroundAlpha="0.8">
+	<mx:Label id="label_etat" text="{datagrid_utilisateur.dataProvider.length} fiches trouvées" width="100%" textAlign="right"/>
+</mx:HBox>
+
+</mx:VBox>
+</mx:Canvas>
+

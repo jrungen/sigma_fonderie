@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="850" height="650" creationComplete="load();" backgroundColor="#E2E2E2" themeColor="#E2E2E2" borderColor="#E2E2E2" 
+	paddingTop="8" paddingLeft="8" paddingRight="8" paddingBottom="8">
+	<mx:Script source="global.as" />
+
+<mx:Script>
+	<![CDATA[
+		import mx.collections.ArrayCollection;
+		private function load():void{
+			rest_dashboard_ca_par_collaborateur.send();
+			rest_dashboard_marge_par_collaborateur.send();
+			rest_dashboard_dossier_par_collaborateur.send();
+			rest_dashboard_pie_localisation.send();
+			rest_dashboard_pie_marge_client.send();
+		}
+		
+		
+
+	]]>
+</mx:Script>
+<!-- Fomat nombre -->
+<mx:NumberFormatter id="numberFormatter" thousandsSeparatorTo=" " useThousandsSeparator="true" decimalSeparatorTo="." precision="2" rounding="up"/>
+
+<!-- HTTP SERVICE, Pour lecture de la fiche -->
+<mx:HTTPService id="rest_dashboard_ca_par_collaborateur" showBusyCursor="true" method="GET" url="dashboard_ca_par_collaborateur.php"/>
+<mx:HTTPService id="rest_dashboard_marge_par_collaborateur" showBusyCursor="true" method="GET" url="dashboard_marge_par_collaborateur.php"/>
+<mx:HTTPService id="rest_dashboard_dossier_par_collaborateur" showBusyCursor="true" method="GET" url="dashboard_dossier_par_collaborateur.php?type=produit"/>
+<mx:HTTPService id="rest_dashboard_pie_localisation" showBusyCursor="true" method="GET" url="dashboard_pie_localisation.php?type=compte"/>
+<mx:HTTPService id="rest_dashboard_pie_marge_client" showBusyCursor="true" method="GET" url="dashboard_pie_marge_client.php" />
+
+<mx:Button label="Actualiser" click="load()" icon="@Embed(source='assets/icones/actualiser.png')" />
+
+<mx:HBox width="100%" height="100%">
+
+	<mx:VBox width="100%" height="100%" backgroundColor="#FFFFFF" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+	<mx:Label text="CA par chef de projet"  fontWeight="bold" fontSize="12" textDecoration="underline"/>
+
+				<mx:BarChart id="ca_par_collaborateur" width="100%" height="100%" 
+					dataProvider="{rest_dashboard_ca_par_collaborateur.lastResult.dashboard.item}" showDataTips="true">
+			<mx:verticalAxis>
+				<mx:CategoryAxis
+				dataProvider="{rest_dashboard_ca_par_collaborateur.lastResult.dashboard.item}"
+				categoryField="utilisateur"
+				/>
+			</mx:verticalAxis>
+			<mx:series>
+				<mx:BarSeries
+				yField="utilisateur"
+				xField="ca_ht"
+				displayName="CA"
+				/>
+			</mx:series>
+		</mx:BarChart>
+	</mx:VBox>
+	
+	<mx:VBox width="100%" height="100%" backgroundColor="#FFFFFF" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+	<mx:Label text="Marge par chef de projet"  fontWeight="bold" fontSize="12" textDecoration="underline"/>
+
+				<mx:BarChart id="marge_par_collaborateur" width="100%" height="100%" dataProvider="{rest_dashboard_marge_par_collaborateur.lastResult.dashboard.item}" showDataTips="true">
+			<mx:verticalAxis>
+				<mx:CategoryAxis
+				dataProvider="{rest_dashboard_marge_par_collaborateur.lastResult.dashboard.item}"
+				categoryField="utilisateur"
+				/>
+			</mx:verticalAxis>
+			<mx:series>
+				<mx:BarSeries
+				yField="utilisateur"
+				xField="marge"
+				displayName="Marge"
+				/>
+			</mx:series>
+		</mx:BarChart>
+		
+		<!-- <mx:Legend dataProvider="{myChartPie}" />	-->		
+
+	</mx:VBox>
+	
+	<mx:VBox width="100%" height="100%" backgroundColor="#FFFFFF" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+	<mx:Label text="Nb de dossiers par chef de projet "  fontWeight="bold" fontSize="12" textDecoration="underline"/>
+				<mx:BarChart id="dossier_par_collaborateur" width="100%" height="100%" dataProvider="{rest_dashboard_dossier_par_collaborateur.lastResult.dashboard.item}" showDataTips="true">
+			<mx:verticalAxis>
+				<mx:CategoryAxis
+				dataProvider="{rest_dashboard_dossier_par_collaborateur.lastResult.dashboard.item}"
+				categoryField="utilisateur"
+				/>
+			</mx:verticalAxis>
+			<mx:series>
+				<mx:BarSeries
+				yField="utilisateur"
+				xField="nb"
+				displayName="Nb dossier"
+				/>
+			</mx:series>
+		</mx:BarChart>
+
+
+	</mx:VBox>
+</mx:HBox>
+
+<mx:HBox width="100%" height="100%">
+	<mx:VBox width="100%" height="100%" backgroundColor="#FFFFFF" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+	<mx:Label text="Répartition des dossiers "  fontWeight="bold" fontSize="12" textDecoration="underline"/>
+
+		<mx:PieChart id="pie_localisation" 
+		dataProvider="{rest_dashboard_pie_localisation.lastResult.dashboard.item}" 
+		showDataTips="true" width="100%" height="100%"
+		 >
+		<mx:series>
+		   <mx:PieSeries 
+		        field="ca_ht" 
+		        nameField="localisation" 
+		        labelPosition="callout"
+		   />
+		</mx:series>
+		
+		</mx:PieChart>
+
+	</mx:VBox>
+
+	<mx:VBox width="100%" height="100%" backgroundColor="#FFFFFF" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+	<mx:Label text="Marge par clients"  fontWeight="bold" fontSize="12" textDecoration="underline"/>
+	<mx:HBox width="100%" height="100%">
+		
+	
+		<mx:PieChart id="pie_marge_client" 
+		dataProvider="{rest_dashboard_pie_marge_client.lastResult.dashboard.item}" 
+		showDataTips="true" width="100%" height="100%"
+		 >
+		<mx:series>
+		   <mx:PieSeries 
+		        field="marge" 
+		        nameField="societe" 
+		        labelPosition="callout"
+		   />
+		</mx:series>
+		
+		</mx:PieChart>
+		 <mx:Legend dataProvider="{pie_marge_client}" width="100%"/>
+</mx:HBox>
+	</mx:VBox>
+</mx:HBox>
+
+</mx:VBox>
+
+
+

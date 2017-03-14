@@ -1,0 +1,537 @@
+<?xml version="1.0"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="932" height="756" 
+	title="Fiche Dépenses annexes " creationComplete="load();initButton();"
+	xmlns:components="com.hillelcoren.components.*"
+	titleIcon="@Embed(source='assets/icones/depenses_annexes.png')" showCloseButton="true" close="fermer();" backgroundColor="#7ba05b" borderColor="#7ba05b" initialize="createListenerdepenses_annexes(event)" mouseOver="refresh_depenses_annexes();">
+	<mx:Script source="depenses_annexes_script.as" />
+	<mx:Script source="global.as" />
+	<mx:Script source="depenses_annexesItem_script.as" />
+
+	<!-- Fomat nombre -->
+	<mx:NumberFormatter thousandsSeparatorTo=" " thousandsSeparatorFrom=" " id="numberFormatter" precision="2" rounding="up"/>
+	
+	<!-- HTTP SERVICE, Pour lecture de la fiche -->
+   <mx:HTTPService id="restdepenses_annexesRead" showBusyCursor="true" result="onLoad(event)"/>
+
+	<!-- HTTP SERVICE, Pour suppression de la fiche -->
+   <mx:HTTPService id="restDelete" showBusyCursor="true" />
+
+   <!-- HTTP SERVICE, Pour les connexions -->
+   <mx:HTTPService id="restConnexion" method="POST" />
+
+	<!-- HTTP SERVICE, sauvegarder les données create de la fiche -->
+   <mx:HTTPService id="restdepenses_annexesCreate" url="depenses_annexesCreate.php" 
+   	useProxy="false" method="POST" showBusyCursor="true" result="onCreate(event)">
+   <mx:request xmlns="">
+	<utilisateur>{connexion_utilisateur.text}</utilisateur>
+<cle>{text_cle.text}</cle>
+<date>{date_date.text}</date>
+<libelle>{text_libelle.text}</libelle>
+<objet>{combo_objet.text}</objet>
+<date_creation>{date_date_creation.text}</date_creation>
+<creation_par>{text_creation_par.text}</creation_par>
+<type_depense>{combo_type_depense.text}</type_depense>
+<tiers>{connexion_tiers.text}</tiers>
+<projet>{connexion_projet.text}</projet>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<pays>{connexion_pays.text}</pays>
+<action>{combo_action.text}</action>
+<taux_tva>{combo_taux_tva.text}</taux_tva>
+<date_modification>{date_date_modification.text}</date_modification>
+<modification_par>{text_modification_par.text}</modification_par>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<num_comptable>{text_num_comptable.text}</num_comptable>
+<montant_reglement_ttc>{text_montant_reglement_ttc.text}</montant_reglement_ttc>
+<annee>{combo_annee.text}</annee>
+<date_reglement>{date_date_reglement.text}</date_reglement>
+<montant_ht_196>{text_montant_ht_196.text}</montant_ht_196>
+<montant_tva_196>{text_montant_tva_196.text}</montant_tva_196>
+<pj>{fichier_text_pj.text}</pj>
+<montant_ht_55>{text_montant_ht_55.text}</montant_ht_55>
+<montant_tva_55>{text_montant_tva_55.text}</montant_tva_55>
+<statut>{combo_statut.text}</statut>
+<total_ht>{text_total_ht.text}</total_ht>
+<montant_na_tva>{text_montant_na_tva.text}</montant_na_tva>
+<reglements>{combo_reglements.text}</reglements>
+<montant_ht>{text_montant_ht.text}</montant_ht>
+<montant_tva>{text_montant_tva.text}</montant_tva>
+<beneficiaires>{text_beneficiaires.text}</beneficiaires>
+<montant_ttc>{text_montant_ttc.text}</montant_ttc>
+<rib>{memo_rib.text}</rib>
+<depenses>{combo_depenses.text}</depenses>
+<montant_restant_du>{text_montant_restant_du.text}</montant_restant_du>
+<regle_le>{date_regle_le.text}</regle_le>
+<validation>{combo_validation.text}</validation>
+<num_cheque>{text_num_cheque.text}</num_cheque>
+<montant_ht_7>{text_montant_ht_7.text}</montant_ht_7>
+<montant_tva_7>{text_montant_tva_7.text}</montant_tva_7>
+<total_reglement>{text_total_reglement.text}</total_reglement>
+<compte_charge>{combo_compte_charge.text}</compte_charge>
+<compte_charge_pas_tva>{combo_compte_charge_pas_tva.text}</compte_charge_pas_tva>
+<compte_tva>{combo_compte_tva.text}</compte_tva>
+<compte_tier>{text_compte_tier.text}</compte_tier>
+<nouveau>{combo_nouveau.text}</nouveau>
+<statut_compta>{combo_statut_compta.text}</statut_compta>
+<statut_compta_banque>{combo_statut_compta_banque.text}</statut_compta_banque>
+<statut_compta_banque_od>{combo_statut_compta_banque_od.text}</statut_compta_banque_od>
+<banque>{combo_banque.text}</banque>
+<pointe>{combo_pointe.text}</pointe>
+
+   </mx:request>
+   </mx:HTTPService>
+   
+   <!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+   <mx:HTTPService id="restdepenses_annexesUpdate" url="depenses_annexesUpdate.php" 
+   	useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+   <mx:request xmlns="">
+	<utilisateur>{connexion_utilisateur.text}</utilisateur>
+<cle>{text_cle.text}</cle>
+<date>{date_date.text}</date>
+<libelle>{text_libelle.text}</libelle>
+<objet>{combo_objet.text}</objet>
+<date_creation>{date_date_creation.text}</date_creation>
+<creation_par>{text_creation_par.text}</creation_par>
+<type_depense>{combo_type_depense.text}</type_depense>
+<tiers>{connexion_tiers.text}</tiers>
+<projet>{connexion_projet.text}</projet>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<pays>{connexion_pays.text}</pays>
+<action>{combo_action.text}</action>
+<taux_tva>{combo_taux_tva.text}</taux_tva>
+<date_modification>{date_date_modification.text}</date_modification>
+<modification_par>{text_modification_par.text}</modification_par>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<num_comptable>{text_num_comptable.text}</num_comptable>
+<montant_reglement_ttc>{text_montant_reglement_ttc.text}</montant_reglement_ttc>
+<annee>{combo_annee.text}</annee>
+<date_reglement>{date_date_reglement.text}</date_reglement>
+<montant_ht_196>{text_montant_ht_196.text}</montant_ht_196>
+<montant_tva_196>{text_montant_tva_196.text}</montant_tva_196>
+<pj>{fichier_text_pj.text}</pj>
+<montant_ht_55>{text_montant_ht_55.text}</montant_ht_55>
+<statut>{combo_statut.text}</statut>
+<montant_tva_55>{text_montant_tva_55.text}</montant_tva_55>
+<total_ht>{text_total_ht.text}</total_ht>
+<montant_na_tva>{text_montant_na_tva.text}</montant_na_tva>
+<reglements>{combo_reglements.text}</reglements>
+<montant_ht>{text_montant_ht.text}</montant_ht>
+<montant_tva>{text_montant_tva.text}</montant_tva>
+<beneficiaires>{text_beneficiaires.text}</beneficiaires>
+<montant_ttc>{text_montant_ttc.text}</montant_ttc>
+<rib>{memo_rib.text}</rib>
+<depenses>{combo_depenses.text}</depenses>
+<montant_restant_du>{text_montant_restant_du.text}</montant_restant_du>
+<regle_le>{date_regle_le.text}</regle_le>
+<validation>{combo_validation.text}</validation>
+<num_cheque>{text_num_cheque.text}</num_cheque>
+<montant_ht_7>{text_montant_ht_7.text}</montant_ht_7>
+<montant_tva_7>{text_montant_tva_7.text}</montant_tva_7>
+<total_reglement>{text_total_reglement.text}</total_reglement>
+<compte_charge>{combo_compte_charge.text}</compte_charge>
+<compte_charge_pas_tva>{combo_compte_charge_pas_tva.text}</compte_charge_pas_tva>
+<compte_tva>{combo_compte_tva.text}</compte_tva>
+<compte_tier>{text_compte_tier.text}</compte_tier>
+<nouveau>{combo_nouveau.text}</nouveau>
+<statut_compta>{combo_statut_compta.text}</statut_compta>
+<statut_compta_banque>{combo_statut_compta_banque.text}</statut_compta_banque>
+<statut_compta_banque_od>{combo_statut_compta_banque_od.text}</statut_compta_banque_od>
+<banque>{combo_banque.text}</banque>
+<pointe>{combo_pointe.text}</pointe>
+
+   </mx:request>
+   </mx:HTTPService>
+ 
+<!-- HTTP VUES -->
+	
+ 
+<!-- HTTP SERVICE CONNEXION-->
+	<mx:HTTPService id="rest_connexion_utilisateur" showBusyCursor="true" result="rest_connexion_utilisateur_result();"/>
+<mx:HTTPService id="rest_connexion_tiers" showBusyCursor="true" result="rest_connexion_tiers_result();"/>
+<mx:HTTPService id="rest_connexion_projet" showBusyCursor="true" result="rest_connexion_projet_result();"/>
+<mx:HTTPService id="rest_connexion_pays" showBusyCursor="true" result="rest_connexion_pays_result();"/>
+
+	
+<!-- VALIDATOR -->
+	<mx:StringValidator id="valid_utilisateur" source="{connexion_utilisateur}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_date" source="{date_date}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_type_depense" source="{combo_type_depense}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_pays" source="{connexion_pays}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<!--
+<mx:StringValidator id="valid_num_comptable" source="{text_num_comptable}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+-->
+ 	
+		<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  width="100%" height="100%" >
+			<mx:VBox height="100%" width="100%" paddingTop="10">
+			<mx:TabNavigator id="tab_depenses_annexes" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+				<mx:Canvas id="tab_depenses_annexes_depenses" label="Dépenses" width="100%" height="100%" mouseOver="calcul_depense_annexe();" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Date" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_date" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.date}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Objet" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_objet" width="250" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.objet}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Prestation Tourisme d'affaires</mx:String>
+<mx:String>Prestation Evenementielles</mx:String>
+<mx:String>Prestation de Services</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Type dépense" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_type_depense" width="250" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.type_depense}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Frais bancaires</mx:String>
+<mx:String>Gain de change</mx:String>
+<mx:String>Note de caisse</mx:String>
+<mx:String>Note de CB</mx:String>
+<mx:String>Note de frais</mx:String>
+<mx:String>Perte de change</mx:String>
+<mx:String>Régie pour compte</mx:String>
+<mx:String>Remboursement frais médecin</mx:String>
+<mx:String>Salaire</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Action à faire" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_action" width="250" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.action}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Acompte à régler</mx:String>
+<mx:String>Solde à régler</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Facturation"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+
+<mx:FormItem label="Taux TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+	<mx:ComboBox id="combo_taux_tva" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.taux_tva}"  change="change_label();">
+	<mx:dataProvider>
+		<mx:String>Nouveau</mx:String>
+		<mx:String>Ancien</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+
+<mx:FormItem label="N° pièce" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_num_comptable" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.num_comptable}"  />
+</mx:FormItem>
+<mx:FormItem label="Montant HT 19.6%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"   id="mht_196">
+<mx:TextInput id="text_montant_ht_196" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_ht_196}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TVA 19.6%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"   id="mtva_196">
+<mx:TextInput id="text_montant_tva_196" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_tva_196}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant HT 5.5%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_55" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_ht_55}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TVA 5.5%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva_55" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_tva_55}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+
+<mx:FormItem label="Montant HT 7%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"   id="mht_7">
+<mx:TextInput id="text_montant_ht_7" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_ht_7}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TVA 7%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"   id="mtva_7">
+<mx:TextInput id="text_montant_tva_7" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_tva_7}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+
+<mx:FormItem label="Total HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox>
+<mx:TextInput id="text_total_ht" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.total_ht}"   restrict="[0-9.\-]" textAlign="right" />
+	<mx:ComboBox id="combo_compte_charge" width="140"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.compte_charge}" >
+		<mx:dataProvider>
+		<mx:String></mx:String>
+		<mx:String>60404000</mx:String>
+		<mx:String>60405000</mx:String>
+		<mx:String>60410000</mx:String>
+		<mx:String>60420000</mx:String>
+		<mx:String>60450000</mx:String>
+		<mx:String>62700000</mx:String>
+		</mx:dataProvider>
+	</mx:ComboBox>
+</mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Montant non Assujeti TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox>
+	<mx:TextInput id="text_montant_na_tva" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_na_tva}"   restrict="[0-9.\-]" textAlign="right" />
+	<mx:ComboBox id="combo_compte_charge_pas_tva" width="140"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.compte_charge_pas_tva}" >
+		<mx:dataProvider>
+		<mx:String></mx:String>
+		<mx:String>60404000</mx:String>
+		<mx:String>60405000</mx:String>
+		<mx:String>60406000</mx:String>
+		<mx:String>60410000</mx:String>
+		<mx:String>60420000</mx:String>
+		<mx:String>60440000</mx:String>
+		<mx:String>60450000</mx:String>
+		<mx:String>62250000</mx:String>
+		<mx:String>62700000</mx:String>
+		</mx:dataProvider>
+	</mx:ComboBox>
+</mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Montant HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox>
+<mx:TextInput id="text_montant_tva" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_tva}"   restrict="[0-9.\-]" textAlign="right" />
+	<mx:ComboBox id="combo_compte_tva" width="140"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.compte_tva}" >
+		<mx:dataProvider>
+		<mx:String></mx:String>
+		<mx:String>44566000</mx:String>
+		</mx:dataProvider>
+	</mx:ComboBox>	
+</mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Montant TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox>
+	<mx:TextInput id="text_montant_ttc" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_ttc}"   restrict="[0-9.\-]" textAlign="right"  change="tva_inverse();"/>
+	<mx:TextInput id="text_compte_tier" width="140" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.compte_tier}"   textAlign="right" />
+
+</mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Total règlement" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_total_reglement" width="100" 
+	text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.total_reglement}"
+	restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant restant dû" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_restant_du" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_restant_du}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Réglé le" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_regle_le" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.regle_le}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="N° de pièce" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_num_cheque" width="100" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.num_cheque}"  />
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+	<mx:FormItem label="Chef de projet" width="95%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_utilisateur"  editable="false" width="100%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.utilisateur}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionutilisateur();"/></mx:VBox></mx:HBox>
+	</mx:FormItem>
+	<mx:FormItem label="Libellé" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_libelle" width="93%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.libelle}"   />
+	</mx:FormItem>
+	
+	<mx:FormItem label="Tiers" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_tiers"  editable="false" width="100%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.tiers}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexiontiers();"/></mx:VBox></mx:HBox>
+	</mx:FormItem>
+	
+	<mx:FormItem label="N° Projet" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_projet"  editable="false" width="100%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.projet}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionprojet();"/></mx:VBox></mx:HBox>
+	</mx:FormItem>
+	<mx:FormItem label="Pays" width="95%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_pays"  editable="false" width="100%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.pays}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionpays();"/></mx:VBox></mx:HBox>
+	</mx:FormItem>
+	<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Demande de règlement"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+	<mx:FormItem label="Montant dépense TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_reglement_ttc" width="93%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.montant_reglement_ttc}"  restrict="[0-9.\-]" textAlign="right"/>
+	</mx:FormItem>
+	<mx:FormItem label="Date" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date_reglement" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.date_reglement}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+	</mx:FormItem>
+	<mx:FormItem label="Justificatif" width="97%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj"  width="150"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.pj}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj" click="initFile_pj()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj" label="Ouvrir" click="openNewWindow_pj(event)"/></mx:VBox></mx:HBox></mx:FormItem>
+	<mx:FormItem label="Statut" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_statut" width="150"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.statut}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>A régler</mx:String>
+<mx:String>Réglé</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+	</mx:FormItem>
+	<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Modalités de règlement"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+	<mx:FormItem label="Règlement" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_reglements" width="150"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.reglements}" change="casVirementRip();">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Amex</mx:String>
+<mx:String>CB</mx:String>
+<mx:String>Chèque</mx:String>
+<mx:String>Espèces</mx:String>
+<mx:String>Prélèvement</mx:String>
+<mx:String>Virement</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+	</mx:FormItem>
+	<mx:FormItem label="Bénéficiaire" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_beneficiaires" width="93%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.beneficiaires}"   />
+	</mx:FormItem>
+	<mx:FormItem label="RIB" width="100%" height="60" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_rib" wordWrap="true" editable="true" height="60" width="93%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.rib}"/>
+	</mx:FormItem>
+	<mx:FormItem label="Validation" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+	<mx:ComboBox id="combo_validation" width="150"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.validation}" >
+	<mx:dataProvider>
+	<mx:String>En cours</mx:String>
+	<mx:String>Validation</mx:String>
+	
+	</mx:dataProvider>
+	</mx:ComboBox>
+	</mx:FormItem>
+	<mx:FormItem label="Statut compta" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+		<mx:ComboBox id="combo_statut_compta" width="150" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.statut_compta}" >
+		<mx:dataProvider>
+		<mx:String></mx:String>
+		<mx:String>A comptabiliser</mx:String>
+		<mx:String>En attente</mx:String>
+		<mx:String>Comptabilisée</mx:String>
+		
+		</mx:dataProvider>
+		</mx:ComboBox>
+	</mx:FormItem>
+
+	<mx:FormItem label="Statut cpta bq" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+		<mx:ComboBox id="combo_statut_compta_banque" 
+			width="150" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.statut_compta_banque}" >
+		<mx:dataProvider>
+		<mx:String></mx:String>
+		<mx:String>A comptabiliser</mx:String>
+		<mx:String>En attente</mx:String>
+		<mx:String>Comptabilisée</mx:String>
+		</mx:dataProvider>
+		</mx:ComboBox>
+	</mx:FormItem>
+	
+<mx:FormItem label="Banque" width="100%" labelWidth="120"  visible="true" enabled="true" required="false">
+	<mx:ComboBox id="combo_banque" width="150" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.banque}" >
+	<mx:dataProvider>
+	<mx:String>51220000</mx:String>
+	<mx:String>5120500</mx:String>
+	<mx:String>5121000</mx:String>
+	<mx:String>5121020</mx:String>
+	<mx:String>51250000</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+	
+<mx:FormItem label="Pointé" width="100%" labelWidth="120"  visible="true" enabled="true" required="false">
+	<mx:ComboBox id="combo_pointe" width="150" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.pointe}" >
+	<mx:dataProvider>
+	<mx:String>Non</mx:String>
+	<mx:String>Oui</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+
+<mx:FormItem label="Statut cpta bq od" width="100%" labelWidth="120" visible="false" enabled="true" required="false" >
+	<mx:ComboBox id="combo_statut_compta_banque_od" width="95%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.statut_compta_banque_od}" >
+	<mx:dataProvider>
+	<mx:String>A comptabiliser</mx:String>
+	<mx:String>En attente</mx:String>
+	<mx:String>Comptabilisée</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+	
+<mx:FormItem label="Dépense" width="100%" labelWidth="120" visible="false" enabled="true" required="false" >
+	<mx:ComboBox id="combo_depenses" width="95%"  text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.depenses}" >
+	<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>A régler</mx:String>
+	<mx:String>Réglée</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+
+	
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_depenses_annexes_systeme" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="cle" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="95%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.annee}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>2012</mx:String>
+<mx:String>2011</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Nouveau" width="100%" labelWidth="120" visible="false" enabled="true" required="false" >
+<mx:ComboBox id="combo_nouveau" width="95%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.nouveau}" >
+<mx:dataProvider>
+<mx:String>Oui</mx:String>
+<mx:String>Non</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+	</mx:FormItem>
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="iddepenses_annexes" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_iddepenses_annexes" width="95%" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.iddepenses_annexes}"   />
+</mx:FormItem>
+<mx:FormItem label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restdepenses_annexesRead.lastResult.depenses_annexesRead.item.modification_par}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+			</mx:TabNavigator>
+			</mx:VBox>
+		</mx:Canvas>
+		<mx:HBox width="100%" horizontalAlign="right">
+			<mx:Button label="Imprimer BNP" id="btn_imprimer" click="imprimer()">
+				<mx:icon>@Embed(source='assets/icones/imprimer.png')</mx:icon>
+			</mx:Button>
+			
+			<mx:Button label="Imprimer HSBC" id="btn_imprimer2" click="imprimer2()">
+				<mx:icon>@Embed(source='assets/icones/imprimer.png')</mx:icon>
+			</mx:Button>
+			<!--
+			<mx:Button label="Appliquer" id="btn_appliquer" click="appliquer()">
+				<mx:icon>@Embed(source='assets/icones/appliquer.png')</mx:icon>
+			</mx:Button>
+			-->
+			<mx:Button id="btn_enregistrer" click="enregistrer()" label="Enregistrer">
+				<mx:icon>@Embed(source='assets/icones/enregistrer.png')</mx:icon>
+			</mx:Button>
+		</mx:HBox>
+
+</mx:TitleWindow>
+
+
+

@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="societeTable_script.as" />
+<mx:Script source="societe_script.as" />
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restsocieteList" url="societeList.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restsocieteRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restsocieteUpdate" url="societeUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<nom>{text_nom.text}</nom>
+<tel>{text_tel.text}</tel>
+<cle>{text_cle.text}</cle>
+<caht>{text_caht.text}</caht>
+<fax>{text_fax.text}</fax>
+<adresse>{text_adresse.text}</adresse>
+<date_creation>{date_date_creation.text}</date_creation>
+<creation_par>{text_creation_par.text}</creation_par>
+<margeht>{text_margeht.text}</margeht>
+<email>{text_email.text}</email>
+<adressesuite>{text_adressesuite.text}</adressesuite>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<cp>{text_cp.text}</cp>
+<siret>{text_siret.text}</siret>
+<date_modification>{date_date_modification.text}</date_modification>
+<modification_par>{text_modification_par.text}</modification_par>
+<ville>{text_ville.text}</ville>
+<pays>{connexion_pays.text}</pays>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<type>{combo_type.text}</type>
+<tva_intra>{text_tva_intra.text}</tva_intra>
+<annee>{combo_annee.text}</annee>
+<profil>{combo_profil.text}</profil>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restSocieteProjet" showBusyCursor="true"/>
+<mx:HTTPService id="restSocieteContact" showBusyCursor="true"/>
+<mx:HTTPService id="restDelete" showBusyCursor="true"/>
+
+<mx:HTTPService id="rest_connexion_pays" showBusyCursor="true" result="rest_connexion_pays_result();"/>
+
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+			<mx:String>nom</mx:String>
+<mx:String>tel</mx:String>
+<mx:String>adresse</mx:String>
+<mx:String>cp</mx:String>
+<mx:String>ville</mx:String>
+
+	</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchsociete()"/>
+<mx:Label text="Filtre" />
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+				<mx:String>Type client</mx:String>
+				<mx:String>Type Tiers</mx:String>
+
+	</mx:dataProvider>			
+</mx:ComboBox>
+<mx:Button label="Afficher" click="searchsociete()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+  <mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Enregistrer" />
+	<menuitem label="Supprimer" />
+	<menuitem label="Exporter vers Excel" />
+	<menuitem label="Fermer" />
+  </mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+
+<mx:HDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid" width="100%" height="100%" dataProvider="{restsocieteList.lastResult.societeList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_societe">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="Raison social" dataField="nom"  visible="true" width="230" />
+<mx:AdvancedDataGridColumn headerText="Adresse" dataField="adresse"  visible="true" width="230" />
+<mx:AdvancedDataGridColumn headerText="Adresse 2" dataField="adressesuite"  visible="true" width="170" />
+<mx:AdvancedDataGridColumn headerText="CP" dataField="cp"  visible="true" width="52" />
+<mx:AdvancedDataGridColumn headerText="Ville" dataField="ville"  visible="true" width="158" />
+<mx:AdvancedDataGridColumn headerText="Téléphone" dataField="tel"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="Pays" dataField="pays"  visible="true" width="170" />
+<mx:AdvancedDataGridColumn headerText="Compte tiers" dataField="compte_tiers"  visible="true" width="170" />
+<mx:AdvancedDataGridColumn headerText="idsociete" dataField="idsociete"  visible="false" />
+
+	</mx:columns>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="false" width="0%" height="0%">
+	<mx:TabNavigator id="tab_societe" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_societe_principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Raison social" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nom" width="200" text="{restsocieteRead.lastResult.societeRead.item.nom}"  />
+</mx:FormItem>
+<mx:FormItem label="Adresse" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_adresse" width="200" text="{restsocieteRead.lastResult.societeRead.item.adresse}"  />
+</mx:FormItem>
+<mx:FormItem label="Adresse 2" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_adressesuite" width="200" text="{restsocieteRead.lastResult.societeRead.item.adressesuite}"  />
+</mx:FormItem>
+<mx:FormItem label="CP" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_cp" width="200" text="{restsocieteRead.lastResult.societeRead.item.cp}"  />
+</mx:FormItem>
+<mx:FormItem label="Ville" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_ville" width="200" text="{restsocieteRead.lastResult.societeRead.item.ville}"  />
+</mx:FormItem>
+<mx:FormItem label="N° TVA intracommunautaire" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tva_intra" width="200" text="{restsocieteRead.lastResult.societeRead.item.tva_intra}"  />
+</mx:FormItem>
+<mx:FormItem label="Profil" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_profil" width="200" text="{restsocieteRead.lastResult.societeRead.item.profil}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>FOE</mx:String>
+<mx:String>FCS</mx:String>
+<mx:String>EOS</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Téléphone" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tel" width="200" text="{restsocieteRead.lastResult.societeRead.item.tel}"   />
+</mx:FormItem>
+<mx:FormItem label="Fax" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_fax" width="200" text="{restsocieteRead.lastResult.societeRead.item.fax}"   />
+</mx:FormItem>
+<mx:FormItem label="Email" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_email" width="200" text="{restsocieteRead.lastResult.societeRead.item.email}"   />
+</mx:FormItem>
+<mx:FormItem label="Siret" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_siret" width="200" text="{restsocieteRead.lastResult.societeRead.item.siret}"   />
+</mx:FormItem>
+<mx:FormItem label="Pays" width="95%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_pays"  editable="false" width="100%" text="{restsocieteRead.lastResult.societeRead.item.pays}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionpays();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Type" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_type" width="200"  text="{restsocieteRead.lastResult.societeRead.item.type}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Client</mx:String>
+<mx:String>Tiers</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_societe_contact" label="Contact" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddSocieteContact()" id="btn_Add_SocieteContact" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_SocieteContact" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_SocieteContact" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_SocieteContact" width="100%" height="100%" dataProvider="{restSocieteContact.lastResult.contactList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateSocieteContact()"><mx:columns><mx:AdvancedDataGridColumn headerText="idcontact" dataField="idcontact" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Clé" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Nom" dataField="nom"/>
+<mx:AdvancedDataGridColumn headerText="Prénom" dataField="prenom"/>
+<mx:AdvancedDataGridColumn headerText="Téléphone" dataField="tel"/>
+<mx:AdvancedDataGridColumn headerText="Email" dataField="email"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_societe_projet" label="Projet" width="100%" height="100%" mouseOver = "calculHT();" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddSocieteProjet()" id="btn_Add_SocieteProjet" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_SocieteProjet" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_SocieteProjet" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_SocieteProjet" width="100%" height="100%" dataProvider="{restSocieteProjet.lastResult.projetList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateSocieteProjet()"><mx:columns><mx:AdvancedDataGridColumn headerText="code (3 lettres)" dataField="numero_code" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Type opération" dataField="nom" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="N° dossier" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Client" dataField="societe" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Lieu" dataField="lieu"/>
+<mx:AdvancedDataGridColumn headerText="Date debut" dataField="datedebut"/>
+<mx:AdvancedDataGridColumn headerText="Date fin" dataField="datefin" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Chef de projet" dataField="utilisateur"/>
+<mx:AdvancedDataGridColumn headerText="CA HT" dataField="ca_ht"/>
+<mx:AdvancedDataGridColumn headerText="Total marge opération" dataField="total_marge"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idprojet" dataField="idprojet" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Taux de marge %" dataField="taux_marge" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:FormItem label="CA HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_caht" width="25%" text="{restsocieteRead.lastResult.societeRead.item.caht}"  />
+</mx:FormItem>
+<mx:FormItem label="Marge HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_margeht" width="25%" text="{restsocieteRead.lastResult.societeRead.item.margeht}"  />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_societe_Système" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="cle" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="200" text="{restsocieteRead.lastResult.societeRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restsocieteRead.lastResult.societeRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restsocieteRead.lastResult.societeRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restsocieteRead.lastResult.societeRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restsocieteRead.lastResult.societeRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restsocieteRead.lastResult.societeRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="idsociete" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idsociete" width="200" text="{restsocieteRead.lastResult.societeRead.item.idsociete}"   />
+</mx:FormItem>
+<mx:FormItem label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restsocieteRead.lastResult.societeRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restsocieteRead.lastResult.societeRead.item.modification_par}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:HDividedBox>
+</mx:VBox>
+</mx:Canvas>
+

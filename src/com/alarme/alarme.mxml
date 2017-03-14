@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="640" height="480" creationComplete="load();" 
+	showCloseButton="true" close="close();"
+	xmlns:crm="*">
+<mx:Script>
+	<![CDATA[
+import mx.core.Application;
+import mx.controls.Alert;
+import mx.controls.DataGrid;
+
+import mx.managers.PopUpManager;
+import mx.controls.TextInput;
+import mx.rpc.events.FaultEvent;
+import mx.rpc.events.ResultEvent;
+
+public var titre:String;
+public var categorie:String;
+public var idrappel:String;
+
+
+private function load():void {
+	PopUpManager.centerPopUp(this);
+	this.title = 'Rappel : '+titre;
+	restAlarme.url = "script/alert.php";
+	restAlarme.send();
+
+	// Afficher une table avec les actions avec une alerte <= maintenant 
+	// <> terminé et <> annulé et <> terminée et <> annulée
+
+}
+
+private function close():void {
+	PopUpManager.removePopUp(this);
+}
+
+private function selectItem():void {
+	/*
+	trace(datagrid_connexion.selectedItem);
+	targetComponent.text = String(datagrid_connexion.selectedItem);
+	close();
+	*/
+}
+
+private function newItem():void{
+}   
+
+private function openItem():void{	
+	/*
+	if(categorie=='action'){
+	var vactionItem:actionItem = actionItem(PopUpManager.createPopUp(this,actionItem,true));
+	vactionItem.text_cle.text = datagrid_connexion.selectedItem.toString();	
+	}
+	*/
+}  	
+	]]>
+</mx:Script>
+
+<!-- HTTPService -->
+<mx:HTTPService id="restAlarme" method="POST" showBusyCursor="true" />
+
+<mx:VBox width="100%" height="100%" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+<mx:HBox width="100%" height="100%">
+<mx:TextArea id="memo_note" wordWrap="true"
+	 editable="false" height="100%" width="100%" />
+
+</mx:HBox>
+<mx:Label text="Autre(s) alarme(s) : ">
+	
+</mx:Label>
+<mx:HBox width="100%" height="100%">
+	<mx:DataGrid x="10" y="10" width="100%" height="100%" dataProvider="{restAlarme.lastResult.list.item}"
+	doubleClickEnabled="true" itemDoubleClick="selectItem()" id="datagrid_rappel">
+	<mx:columns>
+		<mx:DataGridColumn headerText="id" dataField="id"  visible="false" />
+		<mx:DataGridColumn headerText="Catégorie" dataField="categorie" visible="true" />
+		<mx:DataGridColumn headerText="Date" dataField="date"  visible="true" />
+		<mx:DataGridColumn headerText="Heure" dataField="heure"  visible="true" />
+		<mx:DataGridColumn headerText="Titre" dataField="titre"  visible="true" />
+		<mx:DataGridColumn headerText="Statut" dataField="statut"  visible="true" />
+		<mx:DataGridColumn headerText="Note" dataField="note"  visible="false" />
+		
+	</mx:columns>
+</mx:DataGrid>
+</mx:HBox>
+
+<!-- Button -->
+<mx:HBox width="100%" height="30" textAlign="right">
+	<mx:Button x="299" label="Annuler" click="close();"/>
+	<mx:Button label="Ajouter" click="newItem();"/>
+	<mx:Button label="Modifier" click="openItem();"/>
+</mx:HBox>
+</mx:VBox>
+
+
+
+</mx:TitleWindow>
+

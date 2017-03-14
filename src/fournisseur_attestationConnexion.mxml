@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="640" height="480" creationComplete="load();" title="Connexion fournisseur_attestation"
+	xmlns:crm="*">
+	<mx:Script source="fournisseur_attestationConnexion_script.as" />
+<mx:Script>
+	<![CDATA[
+import mx.core.Application;
+import mx.controls.Alert;
+import mx.managers.PopUpManager;
+import mx.controls.TextInput;
+
+public var targetComponent:TextInput;
+public var targetComplement:TextInput;
+public var categorie:String;
+public var filtre:String;
+public var categorie_source:String;
+public var connexion_source:String;
+
+
+
+private function load():void {
+	PopUpManager.centerPopUp(this);
+	restConnexion.url = "fournisseur_attestationConnexion.php?search=&filtre="+filtre;
+	restConnexion.send();
+	onLoad_fournisseur_attestationConnexion();
+}
+
+private function close():void {
+	PopUpManager.removePopUp(this);
+}
+
+private function selectItem():void {
+	targetComponent.text = String(datagrid_connexion.selectedItem.cle);
+	targetComplement.text = String(datagrid_connexion.selectedItem.cle);
+	close();
+}
+private function unselectItem():void {
+	targetComponent.text = "";
+	targetComplement.text = "";
+	close();
+}
+
+
+private function searchconnexion():void{
+	restConnexion.url = "fournisseur_attestationConnexion.php?search="+textSearch.text+"&filtre="+filtre;
+	restConnexion.send();
+}
+private function newItem():void{
+if(categorie=='fournisseur_attestation'){
+var vfournisseur_attestationItem:fournisseur_attestationItem = fournisseur_attestationItem(PopUpManager.createPopUp(this,fournisseur_attestationItem,true));
+vfournisseur_attestationItem.mode = '1';
+}
+			
+}   
+
+private function openItem():void{	
+if(categorie=='fournisseur_attestation'){
+var vfournisseur_attestationItem:fournisseur_attestationItem = fournisseur_attestationItem(PopUpManager.createPopUp(this,fournisseur_attestationItem,true));
+vfournisseur_attestationItem.text_cle.text = datagrid_connexion.selectedItem.cle;	
+}
+
+}
+
+private function delete_fournisseur_attestation(id:String):void{
+restDelete.url = "delete.php?categorie=fournisseur_attestation&id="+id;
+restDelete.send();
+searchconnexion();
+}  	
+	]]>
+</mx:Script>
+	
+<mx:HTTPService id="restConnexion" url="connexion.php" method="POST" showBusyCursor="true" />
+
+<!-- HTTP SERVICE, Pour suppression de la fiche -->
+<mx:HTTPService id="restDelete" showBusyCursor="true" />
+   
+<!-- HTTP SERVICE pour la recherche -->
+<mx:HTTPService id="restSearchConnexion" url="connexion.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+</mx:request>
+</mx:HTTPService>
+
+<mx:VBox width="100%" height="100%" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+<mx:HBox width="100%" height="30">
+		<mx:TextInput id="textSearch" change="searchconnexion()"/>
+		<mx:Button label="" click="searchconnexion()"  id="btn_Refresh" borderColor="#FFFFFF">
+		<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+		</mx:Button>
+</mx:HBox>
+<mx:HBox width="100%" height="100%">
+<mx:AdvancedDataGrid x="10" y="10" width="100%" height="100%" dataProvider="{restConnexion.lastResult.items.item}"
+	doubleClickEnabled="true" itemDoubleClick="selectItem()" id="datagrid_connexion">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="Fournisseur" dataField="fournisseur"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="ID" dataField="idfournisseur_attestation"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="Date attestation" dataField="date_attestation"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+
+	</mx:columns>
+</mx:AdvancedDataGrid>	
+</mx:HBox>
+<mx:HBox width="100%" height="30" textAlign="right">
+	<mx:Button id="btn_compteConnexion_ajouter" label="Ajouter" click="newItem();"/>
+	<mx:Button id="btn_compteConnexion_modifier" label="Modifier" click="openItem();"/>
+	<mx:Button id="btn_compteConnexion_annuler" label="Annuler" click="close();"/>
+	<mx:Button id="btn_compteConnexion_supprimer" label="Supprimer" click="delete_fournisseur_attestation(datagrid_connexion.selectedItem.idfournisseur_attestation);"/>
+	<mx:Button id="btn_compteConnexion_deselectionner" label="Déselectionner" click="unselectItem();"/>
+	
+</mx:HBox>
+</mx:VBox>
+
+
+
+</mx:TitleWindow>
+

@@ -1,0 +1,1045 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="projetTable_script.as" />
+<mx:Script source="projet_script.as" />
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+		private function calcul_total():void{
+		var total:Number=0;
+		var totalmarge:Number=0;
+			for each (var row:Object in datagrid.dataProvider){
+		  		total += Number(row.ca_ht);
+		  		totalmarge += Number(row.total_marge);
+		  	}
+		  	//Alert.show('test');
+		  	textTotalCAHT.text = total.toFixed();
+		  	textTotalMargeOpe.text = totalmarge.toFixed();
+		}
+	]]>
+</mx:Script>
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restprojetList" url="projetList.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+<statut>{search_combo_statut.text}</statut>
+<annee>{search_combo_annee.text}</annee>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restprojetRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restprojetUpdate" url="projetUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<societe>{connexion_societe.text}</societe>
+<type>{combo_type.text}</type>
+<cle>{text_cle.text}</cle>
+<date_creation>{date_date_creation.text}</date_creation>
+<lieu>{text_lieu.text}</lieu>
+<apporteur_affaire>{text_apporteur_affaire.text}</apporteur_affaire>
+<ta_montant_recette_ttc>{text_ta_montant_recette_ttc.text}</ta_montant_recette_ttc>
+<pe_montant_recette_ht>{text_pe_montant_recette_ht.text}</pe_montant_recette_ht>
+<nom>{combo_nom.text}</nom>
+<creation_par>{text_creation_par.text}</creation_par>
+<datedebut>{date_datedebut.text}</datedebut>
+<pe_montant_depense_ht>{text_pe_montant_depense_ht.text}</pe_montant_depense_ht>
+<ta_montant_recette_accompagnant>{text_ta_montant_recette_accompagnant.text}</ta_montant_recette_accompagnant>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<datefin>{date_datefin.text}</datefin>
+<date_modification>{date_date_modification.text}</date_modification>
+<numero>{text_numero.text}</numero>
+<ta_marge_ht>{text_ta_marge_ht.text}</ta_marge_ht>
+<pe_marge_ht>{text_pe_marge_ht.text}</pe_marge_ht>
+<ta_montant_recette_total_ttc>{text_ta_montant_recette_total_ttc.text}</ta_montant_recette_total_ttc>
+<modification_par>{text_modification_par.text}</modification_par>
+<ta_montant_depense_ttc>{text_ta_montant_depense_ttc.text}</ta_montant_depense_ttc>
+<cas>{text_cas.text}</cas>
+<numero_code>{text_numero_code.text}</numero_code>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<utilisateur>{connexion_utilisateur.text}</utilisateur>
+<ta_marge_ttc>{text_ta_marge_ttc.text}</ta_marge_ttc>
+<statut>{combo_statut.text}</statut>
+<nouveau>{combo_nouveau.text}</nouveau>
+<departement>{combo_departement.text}</departement>
+<annee>{combo_annee.text}</annee>
+<pays>{connexion_pays.text}</pays>
+<ta_tva_marge>{text_ta_tva_marge.text}</ta_tva_marge>
+<ps_montant_recette_ht>{text_ps_montant_recette_ht.text}</ps_montant_recette_ht>
+<ca_ht>{text_ca_ht.text}</ca_ht>
+<recette2_previsionnelle>{text_recette2_previsionnelle.text}</recette2_previsionnelle>
+<total_marge>{text_total_marge.text}</total_marge>
+<recette1_previsionnelle>{text_recette1_previsionnelle.text}</recette1_previsionnelle>
+<ps_montant_depense_ht>{text_ps_montant_depense_ht.text}</ps_montant_depense_ht>
+<depense2_previsionnelle>{text_depense2_previsionnelle.text}</depense2_previsionnelle>
+<taux_marge>{text_taux_marge.text}</taux_marge>
+<ps_marge_ht>{text_ps_marge_ht.text}</ps_marge_ht>
+<depense1_previsionnelle>{text_depense1_previsionnelle.text}</depense1_previsionnelle>
+<marge2_previsionnelle>{text_marge2_previsionnelle.text}</marge2_previsionnelle>
+<ps_tva_marge>{text_ps_tva_marge.text}</ps_tva_marge>
+<montant_total_tva_locale>{text_montant_total_tva_locale.text}</montant_total_tva_locale>
+<marge1_previsionnelle>{text_marge1_previsionnelle.text}</marge1_previsionnelle>
+<date1_previsionnelle>{date_date1_previsionnelle.text}</date1_previsionnelle>
+<pj1_previsionnelle>{fichier_text_pj1_previsionnelle.text}</pj1_previsionnelle>
+<date2_previsionnelle>{date_date2_previsionnelle.text}</date2_previsionnelle>
+<pj3_previsionnelle>{fichier_text_pj3_previsionnelle.text}</pj3_previsionnelle>
+<pj2_previsionnelle>{fichier_text_pj2_previsionnelle.text}</pj2_previsionnelle>
+<str_tourisme_affaire>{text_str_tourisme_affaire.text}</str_tourisme_affaire>
+<std_tourisme_affaire>{text_std_tourisme_affaire.text}</std_tourisme_affaire>
+<date3_previsionnelle>{date_date3_previsionnelle.text}</date3_previsionnelle>
+<str_presta_evenement>{text_str_presta_evenement.text}</str_presta_evenement>
+<std_presta_evenement>{text_std_presta_evenement.text}</std_presta_evenement>
+<pj_confirmee>{combo_pj_confirmee.text}</pj_confirmee>
+<pays_client>{text_pays_client.text}</pays_client>
+<str_total>{text_str_total.text}</str_total>
+<std_total>{text_std_total.text}</std_total>
+<st_total_balance>{text_st_total_balance.text}</st_total_balance>
+<nb_reunion_prev>{text_nb_reunion_prev.text}</nb_reunion_prev>
+<nb_reunion_confirme>{text_nb_reunion_confirme.text}</nb_reunion_confirme>
+<ta_soustotal_autres_facturation>{text_ta_soustotal_autres_facturation.text}</ta_soustotal_autres_facturation>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restProjetFctAvFournisseurPrestationsEvenementielles" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureFournisseurPrestationsEvenementielles" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureAvoirFournisseurTourismeAffaire" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureFournisseurTourismeAffaire" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureAvoirsClientPrestationEvenementielle" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureAvoirClientTourismeAffaire" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureClientTourismeAffaire" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureDepensesAnnexesPEPS" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureDepensesAnnexesTA" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureAutrestourismeAffaire" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureClientAutrePrestationEvenementielle" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureClientAccTourismeAffaire" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureAvoirsClientPrestationServices" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureClientAutrePrestationServices" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureFournisseurPrestationsServices" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFctAvFournisseurPrestationsServices" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureClientPrestationService" showBusyCursor="true"/>
+<mx:HTTPService id="restProjetFactureClientPrestationEvenementielle" showBusyCursor="true"/>
+
+
+<mx:HTTPService id="rest_connexion_societe" showBusyCursor="true" result="rest_connexion_societe_result();"/>
+<mx:HTTPService id="rest_connexion_utilisateur" showBusyCursor="true" result="rest_connexion_utilisateur_result();"/>
+<mx:HTTPService id="rest_connexion_pays" showBusyCursor="true" result="rest_connexion_pays_result();"/>
+
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+		<mx:String>societe</mx:String>
+		<mx:String>lieu</mx:String>
+		<mx:String>nom</mx:String>
+		<mx:String>datedebut</mx:String>
+		<mx:String>datefin</mx:String>
+		<mx:String>numero</mx:String>
+		<mx:String>apporteur_affaire</mx:String>
+	</mx:dataProvider>
+</mx:ComboBox>
+<mx:Label text="Statut" /><mx:ComboBox id="search_combo_statut" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>En cours</mx:String>
+<mx:String>Terminé</mx:String>
+<mx:String>Annulé</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+<mx:Label text="Année" /><mx:ComboBox id="search_combo_annee" >
+<mx:dataProvider>
+<mx:String></mx:String>
+	<mx:String>2017</mx:String>
+	<mx:String>2016</mx:String>
+	<mx:String>2015</mx:String>
+	<mx:String>2014</mx:String>
+	<mx:String>2013</mx:String>
+	<mx:String>2012</mx:String>
+	<mx:String>2011</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchprojet()"/>
+<mx:Label text="Filtre" />
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+			<mx:String>Corinne</mx:String>
+			<mx:String>Kevin</mx:String>
+			<mx:String>Dpt Sante</mx:String>
+			<mx:String>Dpt Corpo</mx:String>
+			<mx:String>Dpt Externalisation</mx:String>
+			<mx:String>Benjamin</mx:String>
+	</mx:dataProvider>			
+</mx:ComboBox>
+<mx:Button label="Afficher" click="searchprojet()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+  <mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Enregistrer" />
+	<menuitem label="Supprimer" />
+	<menuitem label="Exporter vers Excel" />
+	<menuitem label="Fermer" />
+	<menuitem label="MAJ Calcul" />
+  </mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+
+<mx:HDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid" width="100%" height="100%" dataProvider="{restprojetList.lastResult.projetList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_projet">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="code (3 lettres)" dataField="numero_code"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="idprojet" dataField="idprojet"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="Type opération" dataField="nom"  visible="true" width="172" />
+<mx:AdvancedDataGridColumn headerText="N° dossier" dataField="numero"  visible="true" width="73" />
+<mx:AdvancedDataGridColumn headerText="Client" dataField="societe"  visible="true" width="300" />
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"  visible="true" width="150" />
+<mx:AdvancedDataGridColumn headerText="Lieu" dataField="lieu"  visible="true" width="150" />
+<mx:AdvancedDataGridColumn headerText="Date debut" dataField="datedebut"  visible="true" width="80" />
+<mx:AdvancedDataGridColumn headerText="Date fin" dataField="datefin" visible="true" width="80" />
+<mx:AdvancedDataGridColumn headerText="Chef de projet" dataField="utilisateur" visible="true" />
+<mx:AdvancedDataGridColumn headerText="CA HT" dataField="ca_ht" visible="true" textAlign="right" />
+<mx:AdvancedDataGridColumn headerText="Total marge opération" dataField="total_marge" visible="true" width="120" textAlign="right" />
+<mx:AdvancedDataGridColumn headerText="Total balance" dataField="total_balance" visible="true" width="120" textAlign="right" />
+<mx:AdvancedDataGridColumn headerText="Taux de marge %" dataField="taux_marge" visible="true" width="120" textAlign="right" />
+
+	</mx:columns>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="true" width="0%" height="100%">
+	<mx:TabNavigator id="tab_projet" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_projet_affaire" label="Dossier" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="PROJET"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Localisation" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_type" width="95%" text="{restprojetRead.lastResult.projetRead.item.type}" change="localisation(); AdminReinitRecette();">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>PRESTATION SERVICES</mx:String>
+<mx:String>AUTRES</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Type opération" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_nom" width="95%" text="{restprojetRead.lastResult.projetRead.item.nom}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Congrès</mx:String>
+<mx:String>Communication</mx:String>
+<mx:String>Convention</mx:String>
+<mx:String>Honoraires</mx:String>
+<mx:String>Séminaire</mx:String>
+<mx:String>Soirée</mx:String>
+<mx:String>Réunions professionnelles</mx:String>
+<mx:String>Marketin Com</mx:String>
+<mx:String>Gestion d'honoraires</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="N° dossier" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_numero" width="130" text="{restprojetRead.lastResult.projetRead.item.numero}" change="cle_projet()" />
+</mx:FormItem>
+<mx:FormItem label="code (3 lettres)" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_numero_code" width="70" text="{restprojetRead.lastResult.projetRead.item.numero_code}" change="cle_projet()" />
+</mx:FormItem>
+<mx:FormItem label="Statut" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_statut" width="130" text="{restprojetRead.lastResult.projetRead.item.statut}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>En cours</mx:String>
+<mx:String>Terminé</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Pays" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_pays"  editable="false" width="100%" text="{restprojetRead.lastResult.projetRead.item.pays}"  valueCommit="Pays_Client();" />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionpays();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="BUDGET PREVISIONNEL : TOURISME D'AFFAIRES"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Recettes" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_recette1_previsionnelle" width="100" text="{restprojetRead.lastResult.projetRead.item.recette1_previsionnelle}" valueCommit="marge_ta();"  restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Dépenses" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_depense1_previsionnelle" width="100" text="{restprojetRead.lastResult.projetRead.item.depense1_previsionnelle}" valueCommit="marge_ta();"  restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Marge" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_marge1_previsionnelle" width="100" text="{restprojetRead.lastResult.projetRead.item.marge1_previsionnelle}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Pièce(s) jointe(s)"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Version 1" width="80%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj1_previsionnelle"  width="150"  text="{restprojetRead.lastResult.projetRead.item.pj1_previsionnelle}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj1_previsionnelle" click="initFile_pj1_previsionnelle()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj1_previsionnelle" label="Ouvrir" click="openNewWindow_pj1_previsionnelle(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:FormItem label="Version 2" width="80%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj3_previsionnelle"  width="150"  text="{restprojetRead.lastResult.projetRead.item.pj3_previsionnelle}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj3_previsionnelle" click="initFile_pj3_previsionnelle()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj3_previsionnelle" label="Ouvrir" click="openNewWindow_pj3_previsionnelle(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:FormItem label="Version 3" width="80%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj2_previsionnelle"  width="150"  text="{restprojetRead.lastResult.projetRead.item.pj2_previsionnelle}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj2_previsionnelle" click="initFile_pj2_previsionnelle()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj2_previsionnelle" label="Ouvrir" click="openNewWindow_pj2_previsionnelle(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:FormItem label="Version confirmée" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_pj_confirmee" width="130" text="{restprojetRead.lastResult.projetRead.item.pj_confirmee}" change = "confirmePieceJointe();">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>1</mx:String>
+<mx:String>2</mx:String>
+<mx:String>3</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Réunions"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Nbre de réunion prévisionnel" width="100%" labelWidth="160" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nb_reunion_prev" width="130" text="{restprojetRead.lastResult.projetRead.item.nb_reunion_prev}" change = "confirmePieceJointe();" />
+</mx:FormItem>
+<mx:FormItem label="Nbre de réunions confirmées" width="100%" labelWidth="160" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nb_reunion_confirme" width="130" text="{restprojetRead.lastResult.projetRead.item.nb_reunion_confirme}" change = "confirmePieceJointe();" />
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="DESCRIPTION"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Client" width="97%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_societe"  editable="false" width="100%" text="{restprojetRead.lastResult.projetRead.item.societe}"  valueCommit="Pays_Client();" />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionsociete();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Lieu" width="100%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_lieu" width="95%" text="{restprojetRead.lastResult.projetRead.item.lieu}"   />
+</mx:FormItem>
+<mx:FormItem label="Date debut" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_datedebut" width="90" text="{restprojetRead.lastResult.projetRead.item.datedebut}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"/>
+</mx:FormItem>
+<mx:FormItem label="Date fin" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_datefin" width="90" text="{restprojetRead.lastResult.projetRead.item.datefin}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"/>
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Chef de projet" width="95%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_utilisateur"  editable="false" width="100%" text="{restprojetRead.lastResult.projetRead.item.utilisateur}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionutilisateur();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+	<mx:FormItem label="Apporteur d'affaire" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+	<mx:TextInput id="text_apporteur_affaire" width="95%" text="{restprojetRead.lastResult.projetRead.item.apporteur_affaire}"   />
+	</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="BUDGET PREVISIONNEL : PE - PS"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Recettes" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_recette2_previsionnelle" width="100" text="{restprojetRead.lastResult.projetRead.item.recette2_previsionnelle}" valueCommit="marge_ta();" restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Dépenses" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_depense2_previsionnelle" width="100" text="{restprojetRead.lastResult.projetRead.item.depense2_previsionnelle}" valueCommit="marge_pe_ps();" restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Marge" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_marge2_previsionnelle" width="100" text="{restprojetRead.lastResult.projetRead.item.marge2_previsionnelle}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Date" width="100%" labelWidth="35" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date1_previsionnelle" width="90" text="{restprojetRead.lastResult.projetRead.item.date1_previsionnelle}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"/>
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="35" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date2_previsionnelle" width="90" text="{restprojetRead.lastResult.projetRead.item.date2_previsionnelle}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"/>
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="35" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date3_previsionnelle" width="90" text="{restprojetRead.lastResult.projetRead.item.date3_previsionnelle}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"/>
+</mx:FormItem>
+<mx:FormItem label="Pays client" width="100%" labelWidth="120"  visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_pays_client" width="150" text="{restprojetRead.lastResult.projetRead.item.pays_client}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+
+<mx:Canvas id="tab_projet_action" label="Actions" width="100%" height="100%"  >
+
+	<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	</mx:Form>
+
+</mx:Canvas>
+
+<mx:Canvas id="tab_projet_ta_factures_client" label="Client T.Affaires" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures clients TTC"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureClientTourismeAffaire()" id="btn_Add_ProjetFactureClientTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureClientTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureClientTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureClientTourismeAffaire" width="100%" height="100%" dataProvider="{restProjetFactureClientTourismeAffaire.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureClientTourismeAffaire()"><mx:columns><mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures avoirs TTC"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureAvoirClientTourismeAffaire()" id="btn_Add_ProjetFactureAvoirClientTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureAvoirClientTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureAvoirClientTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureAvoirClientTourismeAffaire" width="100%" height="100%" dataProvider="{restProjetFactureAvoirClientTourismeAffaire.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureAvoirClientTourismeAffaire()"><mx:columns><mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures accompagnant TTC"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureClientAccTourismeAffaire()" id="btn_Add_ProjetFactureClientAccTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureClientAccTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureClientAccTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureClientAccTourismeAffaire" width="100%" height="100%" dataProvider="{restProjetFactureClientAccTourismeAffaire.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureClientAccTourismeAffaire()"><mx:columns><mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Autres Factures TTC"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureAutrestourismeAffaire()" id="btn_Add_ProjetFactureAutrestourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureAutrestourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureAutrestourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureAutrestourismeAffaire" width="100%" height="100%" dataProvider="{restProjetFactureAutrestourismeAffaire.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureAutrestourismeAffaire()"><mx:columns><mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_pe_ta_factures_client" label="Client P.Eve" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures clients"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureClientPrestationEvenementielle()" id="btn_Add_ProjetFactureClientPrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureClientPrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureClientPrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureClientPrestationEvenementielle" width="100%" height="100%" dataProvider="{restProjetFactureClientPrestationEvenementielle.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureClientPrestationEvenementielle()"><mx:columns><mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures avoirs clients"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureAvoirsClientPrestationEvenementielle()" id="btn_Add_ProjetFactureAvoirsClientPrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureAvoirsClientPrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureAvoirsClientPrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureAvoirsClientPrestationEvenementielle" width="100%" height="100%" dataProvider="{restProjetFactureAvoirsClientPrestationEvenementielle.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureAvoirsClientPrestationEvenementielle()"><mx:columns><mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Autres factures"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureClientAutrePrestationEvenementielle()" id="btn_Add_ProjetFactureClientAutrePrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureClientAutrePrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureClientAutrePrestationEvenementielle" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureClientAutrePrestationEvenementielle" width="100%" height="100%" dataProvider="{restProjetFactureClientAutrePrestationEvenementielle.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureClientAutrePrestationEvenementielle()"><mx:columns><mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_ps_factures_client" label="Client P.Serv" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures clients"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureClientPrestationService()" id="btn_Add_ProjetFactureClientPrestationService" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureClientPrestationService" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureClientPrestationService" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureClientPrestationService" width="100%" height="100%" dataProvider="{restProjetFactureClientPrestationService.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureClientPrestationService()"><mx:columns><mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures avoirs clients"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureAvoirsClientPrestationServices()" id="btn_Add_ProjetFactureAvoirsClientPrestationServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureAvoirsClientPrestationServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureAvoirsClientPrestationServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureAvoirsClientPrestationServices" width="100%" height="100%" dataProvider="{restProjetFactureAvoirsClientPrestationServices.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureAvoirsClientPrestationServices()"><mx:columns><mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Autres factures"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureClientAutrePrestationServices()" id="btn_Add_ProjetFactureClientAutrePrestationServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureClientAutrePrestationServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureClientAutrePrestationServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureClientAutrePrestationServices" width="100%" height="100%" dataProvider="{restProjetFactureClientAutrePrestationServices.lastResult.facture_clientList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureClientAutrePrestationServices()"><mx:columns><mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Libellé" dataField="libelle"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"/>
+<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_ta_factures_four" label="FRNS T.Affaires" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures fournisseurs TTC"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureFournisseurTourismeAffaire()" id="btn_Add_ProjetFactureFournisseurTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureFournisseurTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureFournisseurTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureFournisseurTourismeAffaire" width="100%" height="100%" dataProvider="{restProjetFactureFournisseurTourismeAffaire.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureFournisseurTourismeAffaire()"><mx:columns><mx:AdvancedDataGridColumn headerText="Total HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures d'avoirs fournisseurs TTC"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureAvoirFournisseurTourismeAffaire()" id="btn_Add_ProjetFactureAvoirFournisseurTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureAvoirFournisseurTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureAvoirFournisseurTourismeAffaire" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureAvoirFournisseurTourismeAffaire" width="100%" height="100%" dataProvider="{restProjetFactureAvoirFournisseurTourismeAffaire.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureAvoirFournisseurTourismeAffaire()"><mx:columns><mx:AdvancedDataGridColumn headerText="Total HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"/>
+<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_pe_factures_four" label="FRNS P.Eve" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures fournisseurs"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureFournisseurPrestationsEvenementielles()" id="btn_Add_ProjetFactureFournisseurPrestationsEvenementielles" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureFournisseurPrestationsEvenementielles" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureFournisseurPrestationsEvenementielles" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureFournisseurPrestationsEvenementielles" width="100%" height="100%" dataProvider="{restProjetFactureFournisseurPrestationsEvenementielles.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureFournisseurPrestationsEvenementielles()"><mx:columns><mx:AdvancedDataGridColumn headerText="Total HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="TVA local normal" dataField="montant_tva_locale" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="pays" dataField="pays" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Type facture" dataField="type" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures avoirs fournisseurs"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFctAvFournisseurPrestationsEvenementielles()" id="btn_Add_ProjetFctAvFournisseurPrestationsEvenementielles" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFctAvFournisseurPrestationsEvenementielles" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFctAvFournisseurPrestationsEvenementielles" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFctAvFournisseurPrestationsEvenementielles" width="100%" height="100%" dataProvider="{restProjetFctAvFournisseurPrestationsEvenementielles.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFctAvFournisseurPrestationsEvenementielles()"><mx:columns><mx:AdvancedDataGridColumn headerText="TVA local normal" dataField="montant_tva_locale" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="pays" dataField="pays" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Total HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"/>
+<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Type facture" dataField="type" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_ps_factures_four" label="FRNS P.Serv" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures fournisseurs"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureFournisseurPrestationsServices()" id="btn_Add_ProjetFactureFournisseurPrestationsServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureFournisseurPrestationsServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureFournisseurPrestationsServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureFournisseurPrestationsServices" width="100%" height="100%" dataProvider="{restProjetFactureFournisseurPrestationsServices.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureFournisseurPrestationsServices()"><mx:columns><mx:AdvancedDataGridColumn headerText="Total HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"/>
+<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Factures avoirs fournisseurs"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFctAvFournisseurPrestationsServices()" id="btn_Add_ProjetFctAvFournisseurPrestationsServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFctAvFournisseurPrestationsServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFctAvFournisseurPrestationsServices" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFctAvFournisseurPrestationsServices" width="100%" height="100%" dataProvider="{restProjetFctAvFournisseurPrestationsServices.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFctAvFournisseurPrestationsServices()"><mx:columns><mx:AdvancedDataGridColumn headerText="Total HT" dataField="montant_ht" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"/>
+<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Type facture" dataField="type" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_depenses_annexes" label="Dépenses annexes" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Dépenses annexes Prestation Evenementielles - Prestation de Services"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureDepensesAnnexesPEPS()" id="btn_Add_ProjetFactureDepensesAnnexesPEPS" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureDepensesAnnexesPEPS" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureDepensesAnnexesPEPS" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureDepensesAnnexesPEPS" width="100%" height="100%" dataProvider="{restProjetFactureDepensesAnnexesPEPS.lastResult.depenses_annexesList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureDepensesAnnexesPEPS()"><mx:columns><mx:AdvancedDataGridColumn headerText="iddepenses_annexes" dataField="iddepenses_annexes" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Pays" dataField="pays" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date"/>
+<mx:AdvancedDataGridColumn headerText="Type dépense" dataField="type_depense"/>
+<mx:AdvancedDataGridColumn headerText="Montant dépense TTC" dataField="montant_reglement_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Réglé le" dataField="regle_le"/>
+<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Dépenses annexes Tourisme d'affaires"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddProjetFactureDepensesAnnexesTA()" id="btn_Add_ProjetFactureDepensesAnnexesTA" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_ProjetFactureDepensesAnnexesTA" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_ProjetFactureDepensesAnnexesTA" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_ProjetFactureDepensesAnnexesTA" width="100%" height="100%" dataProvider="{restProjetFactureDepensesAnnexesTA.lastResult.depenses_annexesList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateProjetFactureDepensesAnnexesTA()"><mx:columns><mx:AdvancedDataGridColumn headerText="iddepenses_annexes" dataField="iddepenses_annexes" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Date" dataField="date"/>
+<mx:AdvancedDataGridColumn headerText="Type dépense" dataField="type_depense"/>
+<mx:AdvancedDataGridColumn headerText="Montant dépense TTC" dataField="montant_reglement_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="Réglé le" dataField="regle_le"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_projet_synthese" label="Synthèse" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="PRESTATIONS TOURISME D'AFFAIRES"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Montant recettes TTC" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_montant_recette_ttc" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_montant_recette_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Total factures Accompagnants" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_montant_recette_accompagnant" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_montant_recette_accompagnant}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant recette total TTC" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_montant_recette_total_ttc" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_montant_recette_total_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant dépenses TTC" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_montant_depense_ttc" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_montant_depense_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Marge TTC" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_marge_ttc" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_marge_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="TVA sur marge" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_tva_marge" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_tva_marge}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="PRESTATIONS SERVICES"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Montant recettes HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ps_montant_recette_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.ps_montant_recette_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant dépenses HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ps_montant_depense_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.ps_montant_depense_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Marge HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ps_marge_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.ps_marge_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="TVA sur marge" width="100%" labelWidth="250" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_ps_tva_marge" width="100" text="{restprojetRead.lastResult.projetRead.item.ps_tva_marge}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="SITUATION DE TRESORERIE"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%"><mx:Label text="Prestations Tourisme d'affaires"  fontWeight="bold" width="100%"  enabled="true" color="#000000" fontSize="10" textDecoration="underline" /></mx:HBox>
+<mx:FormItem label="Recettes" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_str_tourisme_affaire" width="100" text="{restprojetRead.lastResult.projetRead.item.str_tourisme_affaire}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Dépenses" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_str_presta_evenement" width="100" text="{restprojetRead.lastResult.projetRead.item.str_presta_evenement}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Total" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_str_total" width="100" text="{restprojetRead.lastResult.projetRead.item.str_total}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Total balance" width="100%" labelWidth="250" visible="true" enabled="true" required="false" fontWeight="bold" color="#FF0000" >
+<mx:TextInput id="text_st_total_balance" width="100" text="{restprojetRead.lastResult.projetRead.item.st_total_balance}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Total autres factures" width="100%" labelWidth="250" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_soustotal_autres_facturation" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_soustotal_autres_facturation}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="PRESTATIONS EVENEMENTIELLES"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Montant recettes HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_pe_montant_recette_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.pe_montant_recette_ht}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Montant dépenses HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_pe_montant_depense_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.pe_montant_depense_ht}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Marge HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ta_marge_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.ta_marge_ht}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Marge HT" width="100%" labelWidth="250" visible="false" enabled="true" required="false" fontWeight="bold" color="#FF0000" >
+<mx:TextInput id="text_pe_marge_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.pe_marge_ht}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="SYNTHESE"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="CA HT" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ca_ht" width="100" text="{restprojetRead.lastResult.projetRead.item.ca_ht}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Total marge opération" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_total_marge" width="100" text="{restprojetRead.lastResult.projetRead.item.total_marge}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Taux de marge %" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_taux_marge" width="100" text="{restprojetRead.lastResult.projetRead.item.taux_marge}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Montant Total TVA locale" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_total_tva_locale" width="100" text="{restprojetRead.lastResult.projetRead.item.montant_total_tva_locale}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text=""  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%"><mx:Label text="Prestations Evénementielles - Services"  fontWeight="bold"  width="100%"  enabled="true" color="#000000" fontSize="10" textDecoration="underline" /></mx:HBox>
+<mx:FormItem label="Recettes" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_std_tourisme_affaire" width="100" text="{restprojetRead.lastResult.projetRead.item.std_tourisme_affaire}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Dépenses" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_std_presta_evenement" width="100" text="{restprojetRead.lastResult.projetRead.item.std_presta_evenement}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Total" width="100%" labelWidth="250" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_std_total" width="100" text="{restprojetRead.lastResult.projetRead.item.std_total}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+
+<mx:Canvas id="tab_projet_satisfaction" label="satisfaction" width="100%" height="100%"  >
+
+	<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	</mx:Form>
+
+</mx:Canvas>
+
+<mx:Canvas id="tab_projet_systeme" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="cle" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_cle" width="150" text="{restprojetRead.lastResult.projetRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem label="Date création" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restprojetRead.lastResult.projetRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Heure création" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restprojetRead.lastResult.projetRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem label="Date modification" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restprojetRead.lastResult.projetRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restprojetRead.lastResult.projetRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem label="Année" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restprojetRead.lastResult.projetRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="idprojet" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_idprojet" width="90" text="{restprojetRead.lastResult.projetRead.item.idprojet}"   />
+</mx:FormItem>
+<mx:FormItem label="Création par" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restprojetRead.lastResult.projetRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restprojetRead.lastResult.projetRead.item.modification_par}"   />
+</mx:FormItem>
+<mx:FormItem label="Cas" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_cas" width="150" text="{restprojetRead.lastResult.projetRead.item.cas}"   />
+</mx:FormItem>
+
+<mx:FormItem label="Nouveau" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+	<mx:ComboBox id="combo_nouveau" width="130" text="{restprojetRead.lastResult.projetRead.item.nouveau}" >
+	<mx:dataProvider>
+		<mx:String>Oui</mx:String>
+		<mx:String>Non</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+
+<mx:FormItem label="Département" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_departement" width="130" text="{restprojetRead.lastResult.projetRead.item.departement}" >
+<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>Dpt Santé</mx:String>
+	<mx:String>Dpt Corpo</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+
+	<mx:ComboBox id="combo_impression_tri_synthese" width="130" text="{restprojetRead.lastResult.projetRead.item.comptable}" >
+	<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>N° pièce</mx:String>
+	<mx:String>Date</mx:String>
+	<mx:String>Libellé</mx:String>
+	
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:HDividedBox>
+
+<mx:HBox height="20" width="100%">
+		<mx:Label text="CA HT" />
+		<mx:TextInput width="100" id="textTotalCAHT" text="{calcul_total()}"/>
+		<mx:Label text="Total marge opération" />
+		<mx:TextInput width="100" id="textTotalMargeOpe"/>
+		<mx:Button label="Calculer" click="calcul_total()"/>
+		<mx:Label paddingLeft="150" />
+		<mx:Button id="btn_export_quadra" label="Export Quadra" click="export_quadra()" visible="false"/>
+		<mx:Button id="btn_tableau_bord" label="Tableaux de bord" click="tableau_bord()" visible="false"/>
+</mx:HBox>
+
+</mx:VBox>
+
+</mx:Canvas>
+

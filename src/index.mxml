@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:MyComp="*" 
+	creationComplete="init();"
+	currentState="login" 
+	paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5"
+	backgroundAlpha="0">
+
+<mx:Style source="multiview.css"/>
+		<mx:Style>
+			ToggleButtonBar
+			{
+				/*button-style-name: "buttons";*/
+			}
+			.buttons
+			{
+				font-family: "Arial";
+				color: #000000;
+				background-color:#ffffff;
+				font-size: 10px;
+				letter-spacing: 1px;
+				text-selected-color: red;
+				text-roll-over-color: orange;
+				padding-bottom: 2px;
+				padding-left: 0px;
+				padding-right: 0px;
+				padding-top: 2px;
+			}
+		</mx:Style>
+		
+<mx:Script source="global.as" />	
+	 	<mx:Script>
+		<![CDATA[
+			import mx.messaging.SubscriptionInfo;
+			import com.alarme.alarme;
+			
+			import mx.states.RemoveChild;
+			import mx.controls.Alert;
+			import mx.events.ItemClickEvent;
+			import mx.rpc.events.ResultEvent;
+			
+import mx.core.ContainerGlobals;
+import mx.core.Application;
+import mx.events.CollectionEvent;
+import mx.controls.Alert;		  
+import mx.events.ListEvent;
+import mx.events.MenuEvent;
+import mx.managers.PopUpManager;
+import mx.collections.ArrayCollection;
+import mx.rpc.events.FaultEvent;
+import mx.rpc.events.ResultEvent;
+/* Validator */
+import mx.validators.Validator;
+import mx.utils.StringUtil;
+import mx.events.ValidationResultEvent;
+import mx.formatters.DateFormatter;
+
+import flash.net.navigateToURL;
+import flash.system.System;
+System.useCodePage = true;
+
+
+public var email:String;
+public var public_selection:String;
+
+import mx.rpc.events.ResultEvent;
+import mx.rpc.http.HTTPService;
+import mx.controls.DataGrid;
+
+// Nouveau numéro
+//private var rest_verif_login:mx.rpc.http.HTTPService = new mx.rpc.http.HTTPService();
+			public var test:DataGrid = new DataGrid();
+
+			private function rest_alarme_result(e:ResultEvent):void{
+				test.dataProvider = rest_alarme.lastResult.list.item;
+			}
+			
+			private function rest_action_result(e:ResultEvent):void{
+				// Créer une datagrid et un dataprovider pour mettre les données des actions du jour
+				//var test:DataGrid = new DataGrid();
+				test.dataProvider = rest_action.lastResult.list.item;
+				flexcrm.addChild(test);
+				test.visible = true;
+				test.width = 1;
+				test.height = 1;
+				
+				// Ajouter un timer minute
+				var timer:Timer = new Timer(40000);
+				timer.addEventListener(TimerEvent.TIMER, alarme_message);
+				timer.start();
+
+				
+				function alarme_message(event:TimerEvent):void{
+					// Parcourir la datagrid à la recherche d'une fiche avec l'heure de maintenant
+						var CurrentDateTime:Date = new Date();
+						var CurrentDF:DateFormatter = new DateFormatter();
+						CurrentDF.formatString = "HH:NN"
+						var CurrentHour:String = CurrentDF.format(CurrentDateTime);
+    					//Alert.show(DateTimeString);
+    					 
+					for each (var row1:Object in test.dataProvider){
+						// Si heure = maintenant alors afficher message
+				  		var heure_alarme:String = String(row1.heure);
+				  		heure_alarme = heure_alarme.substr(0,5);
+				  		//Alert.show(heure_alarme+' = '+String(CurrentHour));
+				  		if(String(CurrentHour)==String(heure_alarme)){
+				  			trace(row1.categorie+" / #" + row1.id + " : " + row1.titre);
+							/*
+							var vAlarme:alarme = alarme(PopUpManager.createPopUp(Application.application.flexcrm,alarme,true));
+							vAlarme.titre = row1.titre.toString();	
+							vAlarme.idrappel = row1.id.toString();
+							vAlarme.categorie = row1.categorie.toString();
+							vAlarme.memo_note.text = row1.note.toString()
+							*/
+							Alert.show(row1.titre.toString(),'Alarme Action à faire : ');
+				  		}
+				  	}
+				}
+				
+				// Ajouter un timer 30 seconde
+				var timer30:Timer = new Timer(30000);
+				//var timer30:Timer = new Timer(15000);
+				timer30.addEventListener(TimerEvent.TIMER, alarme_refresh);
+				timer30.start();
+				
+				function alarme_refresh(event:TimerEvent):void{
+					// Traitement des actions
+					rest_alarme.url ="script/alert.php?user="+gsUtilisateurCle;
+					rest_alarme.send();
+				}
+			}
+
+			private function rest_action_fault(event : FaultEvent):void{
+				Alert.show(event.statusCode.toString() + " / " + event.fault.message.toString()); 
+			}
+
+			private function onConnection():void {
+				var pass:String = txtPass.text;
+				if((txtEmail.text!='')&&(txtPass.text!='')){
+					frmItemEmail.required = frmItemPass.required = false;
+					rest_verif_login.url = "verif_connexion.php?table=utilisateur&login="+txtEmail.text+"&password="+txtPass.text;
+	    	        rest_verif_login.method = "POST";
+					rest_verif_login.send();
+									
+				} else {
+					frmItemEmail.required = frmItemPass.required = true;
+					Alert.show("Les champs marques par une * sont obligatoire.",
+							   "Information");
+				}				
+
+			}
+
+			private function rest_verif_login_fault(event : FaultEvent):void{
+				Alert.show(event.statusCode.toString() + " / " + event.fault.message.toString()); 
+			}
+			
+			private function rest_verif_login_result(e:ResultEvent):void{
+				// Si correcte alors
+				var test:String = rest_verif_login.lastResult.utilisateurList.item.login;
+				if(test==txtEmail.text){			
+					txtProfil.text = rest_verif_login.lastResult.utilisateurList.item.profil;
+					gsProfil = txtProfil.text;
+					gsSociete = rest_verif_login.lastResult.utilisateurList.item.societe;
+					gsUtilisateurCle = rest_verif_login.lastResult.utilisateurList.item.cle;
+					gsUtilisateurLogin = rest_verif_login.lastResult.utilisateurList.item.login;
+					gsUser = rest_verif_login.lastResult.utilisateurList.item.login;
+					addChild(flexcrm);
+					removeChild(connexion);
+
+					// Règle de gestion pour les user
+					if(txtProfil.text=='user'){
+						menu.removeChildAt(3);
+						menu.removeChildAt(7);
+						menu.removeChildAt(9);
+					}else{
+						// on ne retire que le tableau de bord flex
+						menu.removeChildAt(11);
+					}
+					
+					//Alerte
+					if(txtProfil.text!='user'){
+						var vAlerteCreation:alert_creation = alert_creation(PopUpManager.createPopUp(this,alert_creation,true));
+					}
+					
+					// Traitement des actions
+					//Alert.show(txtEmail.text);
+					rest_action.url ="script/alert.php?user="+gsUtilisateurCle;
+					rest_action.send();
+					
+				}else{
+					Alert.show("Nom d\'utilisateur ou mot de passe incorrect.",
+							   "Information");
+				}
+								
+			}
+			
+		
+  		 private function init():void {
+ 				connexion.addEventListener(KeyboardEvent.KEY_DOWN, checkKey);	
+		}
+            			
+			//appuie sur bouton entrer
+	 	 private  function checkKey(event:KeyboardEvent):void{
+				if(event.charCode == 13)
+       			onConnection();
+		}
+			
+			private function validateEmail(email:String):Boolean {
+				var pattern:RegExp = /(\w|[_.\-])+@((\w|-)+\.)+\w{2,4}+/;
+				var result:Object = pattern.exec(email);
+				if(!result)
+					return false;
+				return true;
+			}
+			
+		private function clickHandler(event:ItemClickEvent):void {
+			
+			// si profil user on retire les onglet Admin
+            if(txtProfil.text=='user'){
+            	
+				//Projet
+	            if (event.index==0){
+	            	viewStack.selectedIndex = 0;
+	            }
+	            
+	            //Facture client
+	            if (event.index==1){
+	            	viewStack.selectedIndex = 1 ;
+	            }
+	            
+	            //Facture fournisseur           
+	            if (event.index==2){
+	            	viewStack.selectedIndex = 2;
+	            }
+	            
+	            //Dépenses annexes
+	            if (event.index==3){
+            		viewStack.selectedIndex = 4 ;
+	            }
+	
+	            //Client
+	            if (event.index==4){
+	           		viewStack.selectedIndex = 5 ;
+	            }
+	            
+	            //Fournisseur
+	            if (event.index==5){
+	            	viewStack.selectedIndex = 6 ;
+	            }
+	            
+	            //TIERS
+	            if (event.index==6){
+	            	viewStack.selectedIndex = 7 ;
+	            }
+	            
+	            //Action
+	            if (event.index==7){
+	            	viewStack.selectedIndex = 9;
+	            } 
+				
+				//Satisfaction
+	            if (event.index==8){
+	            	viewStack.selectedIndex = 10;
+	            }
+	            
+	        // sinon on charge normalement tous les onglet (Admin)    
+            }else{
+
+				//Projet
+	            if (event.index==0){
+	            	viewStack.selectedIndex = 0;
+	            }
+	            
+	            //Facture client
+	            if (event.index==1){
+	            	viewStack.selectedIndex = 1 ;
+	            }
+	            
+	            //Facture fournisseur           
+	            if (event.index==2){
+	            	viewStack.selectedIndex = 2;
+	            }
+	            
+	            //Reglement
+	            if (event.index==3){
+	            	viewStack.selectedIndex = 3;
+	            }
+	            
+	            //Dépenses annexes
+	            if (event.index==4){
+            		viewStack.selectedIndex = 4 ;
+	            }
+	
+	            //Client
+	            if (event.index==5){
+	           		viewStack.selectedIndex = 5 ;
+	            }
+	            
+	            //Fournisseur
+	            if (event.index==6){
+	            	viewStack.selectedIndex = 6 ;
+	            }
+	            
+	            //TIERS
+	            if (event.index==7){
+	            	viewStack.selectedIndex = 7 ;
+	            }
+	            
+	            //User
+	            if (event.index==8){
+	           		viewStack.selectedIndex = 8 ;
+	            }
+	            
+	            //Action
+	            if (event.index==9){
+	            	viewStack.selectedIndex = 9;
+	            } 
+				
+				//Satisfaction
+	            if (event.index==10){
+	            	viewStack.selectedIndex = 10;
+	            }
+
+            }
+            
+        }
+        
+		]]>
+	</mx:Script>
+		<mx:HTTPService id="rest_verif_login" result="rest_verif_login_result(event)" fault="rest_verif_login_fault(event)"/>
+		<mx:HTTPService id="rest_action" result="rest_action_result(event)" fault="rest_action_fault(event)"/>
+		<mx:HTTPService id="rest_alarme" result="rest_alarme_result(event)" />
+	
+	<mx:states>
+		<mx:State name="login">
+			<mx:RemoveChild target="{flexcrm}"/>
+			<mx:SetProperty target="{frmItemEmail}" name="label" value="Login"/>
+			<mx:SetProperty target="{button1}" name="label" value="Connexion"/>
+			<mx:RemoveChild target="{frmItemSociete}"/>
+			<mx:AddChild relativeTo="{frmItemEmail}" position="before">
+				<mx:Image source="assets/logo.png" autoLoad="true" horizontalAlign="center" width="100%" height="100"/>
+			</mx:AddChild>
+			<mx:SetProperty target="{panel1}" name="title" value="Sigma - Version 06/10/2016 A"/>
+			<mx:SetProperty target="{panel1}" name="width" value="310"/>
+			<mx:SetProperty target="{panel1}" name="height" value="288"/>
+			<mx:SetProperty target="{form1}" name="width" value="100%"/>
+
+		</mx:State>
+		<mx:State name="Accueil">
+
+			<mx:AddChild relativeTo="{flexcrm}" position="lastChild">
+			
+			</mx:AddChild>
+			<mx:SetProperty target="{flexcrm}" name="title" value="Flex CRM"/>
+		
+			<mx:AddChild relativeTo="{viewStack}" position="lastChild">
+				<mx:Canvas label="Compte" width="100%" height="100%">
+				</mx:Canvas>
+			</mx:AddChild>
+			<mx:SetProperty target="{hbox1}" name="height" value="30"/>
+			<mx:SetStyle target="{hbox1}" name="backgroundColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{flexcrm}" name="backgroundColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{vbox1}" name="backgroundColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{vbox1}" name="borderColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{vbox1}" name="themeColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{connexion}" name="borderColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{connexion}" name="themeColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{connexion}" name="backgroundColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{flexcrm}" name="borderColor" value="#8DA9BA"/>
+			<mx:SetStyle target="{flexcrm}" name="themeColor" value="#8DA9BA"/>
+			<mx:SetProperty target="{panel1}" name="title" value="Connexion"/>
+			<mx:SetStyle name="borderColor" value="#8DA9BA"/>
+			<mx:SetStyle name="themeColor" value="#8DA9BA"/>
+			<mx:SetStyle name="backgroundGradientAlphas" value="[1.0, 1.0]"/>
+			<mx:SetStyle name="backgroundGradientColors" value="[#8DA9BA, #8DA9BA]"/>
+
+		</mx:State>
+	</mx:states>
+	
+	<mx:HBox id="connexion" 
+		width="100%" height="100%" paddingTop="10" 
+		horizontalAlign="center" verticalAlign="Center">
+	<mx:VBox width="100%" height="100%" id="vbox1" horizontalAlign="center">
+		
+
+	<mx:VideoDisplay source="assets/FlexSigma_LoadingVideo01.flv" width="900" height="240" id="FlexSigma_Video" complete="{FlexSigma_Video.play()}" autoPlay="true" backgroundColor="#8DA9BA" borderColor="#8DA9BA" themeColor="#8DA9BA"/>
+
+	<mx:Panel width="350" layout="absolute" title="Connection" paddingTop="50" paddingLeft="20" paddingBottom="20" paddingRight="20" id="panel1">
+		<mx:Form id="form1">
+			<mx:FormItem id="frmItemEmail" label="Email" width="100%">
+				<mx:TextInput id="txtEmail" width="100%"/>
+			</mx:FormItem>
+			<mx:FormItem id="frmItemPass" label="Password" width="100%">
+				<mx:TextInput id="txtPass" width="100%" displayAsPassword="true"/>
+			</mx:FormItem>
+			<mx:FormItem id="frmItemProfil" label="Profil" width="100%" visible="false">
+				<mx:TextInput id="txtProfil" width="100%" text="user"/>
+			</mx:FormItem>
+			<mx:FormItem id="frmItemSociete" label="Société" width="100%">
+				<mx:ComboBox id="txtSociete"  width="100%">
+			        <mx:dataProvider>
+			            <mx:Array>
+			                <mx:Object label="FOE" />
+			                <mx:Object label="FOCS" />
+			                <mx:Object label="EOS" />
+			            </mx:Array>
+			        </mx:dataProvider>
+			    </mx:ComboBox>
+			</mx:FormItem>
+			<mx:FormItem width="100%" textAlign="">
+				<mx:Button label="Connection" click="onConnection()" id="button1" />
+			</mx:FormItem>			
+		</mx:Form>
+		
+	</mx:Panel>
+		</mx:VBox>	
+	</mx:HBox>
+<mx:VBox id="flexcrm" width="100%" height="100%" 
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0" backgroundColor="#FFFFFF">
+<mx:HBox width="100%"  id="hbox1" paddingTop="10" paddingLeft="10">	
+
+<mx:TabBar id="menu" toggleOnClick="true"
+        selectedIndex="0" itemClick="clickHandler(event);" horizontalCenter="0" verticalCenter="0" 
+        width="95%" buttonMode="true" barColor="#000000" paddingBottom="0" >        
+        <mx:dataProvider>
+			<mx:Object label="Projet" icon="@Embed(source='assets/icones/projet.png')" id="tab_index_projet"/>
+			<mx:Object label="Facture client" icon="@Embed(source='assets/icones/facture_client.png')" id="tab_index_facture_client"/>
+			<mx:Object label="Facture fournisseur" icon="@Embed(source='assets/icones/facture_fournisseur.png')" id="tab_index_facture_fournisseur"/>
+			<mx:Object label="Règlement" icon="@Embed(source='assets/icones/facture_fournisseur.png')" id="tab_index_reglement"/>
+			<mx:Object label="Dépenses annexes" icon="@Embed(source='assets/icones/depenses_annexes.png')" id="tab_index_depense_annexe"/>
+			<mx:Object label="Client" icon="@Embed(source='assets/icones/societe.png')" id="tab_index_societe"/>
+			<mx:Object label="Fournisseur" icon="@Embed(source='assets/icones/fournisseur.png')" id="tab_index_fournisseur"/>
+			<mx:Object label="Tiers" icon="@Embed(source='assets/icones/tiers.png')" id="tab_index_tiers"/>
+			<mx:Object label="Utilisateur" icon="@Embed(source='assets/icones/societe.png')" id="tab_index_utilisateur"/>
+			<mx:Object label="Action" icon="@Embed(source='assets/icones/action.png')" id="tab_index_action"/>
+			<mx:Object label="Satisfaction" icon="@Embed(source='assets/icones/satisfaction.png')" id="tab_index_satisfaction"/>			
+			<mx:Object label="Tableau de bord" icon="@Embed(source='assets/icones/projet.png')" id="tab_index_tb"/>
+        </mx:dataProvider>
+
+</mx:TabBar>
+</mx:HBox>
+
+
+		<mx:ViewStack id="viewStack" width="100%" height="100%" paddingTop="0" paddingLeft="10">
+			<!-- PROJET -->
+			<mx:Form label="Projet" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:projetTable width="100%" height="100%" id="comp_projet"/>
+			</mx:Form>
+			
+			<!-- FACTURE_CLIENT -->
+			<mx:Form label="Facture client" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:facture_clientTable width="100%" height="100%" id="comp_fc"/>
+			</mx:Form>			
+
+			<!-- FACTURE FOURNISSEUR -->
+			<mx:Form label="Facture fournisseur" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:facture_fournisseurTable width="100%" height="100%" id="comp_ff"/>
+			</mx:Form>
+			
+			<!-- REGLEMENT -->		
+			<mx:Form label="Règlement" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:facture_fournisseur_ligneTable width="100%" height="100%" id="comp_reglement"/>
+			</mx:Form>
+
+			<!-- DEPENSES -->		
+			<mx:Form label="Société" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:depenses_annexesTable width="100%" height="100%" id="comp_da"/>
+			</mx:Form>
+
+			<!-- SOCIETE -->		
+			<mx:Form label="Société" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:societeTable width="100%" height="100%" id="comp_soc"/>
+			</mx:Form>
+
+			<!-- FOURNISSEUR -->
+			<mx:Form label="Fournisseur" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:fournisseurTable width="100%" height="100%" id="comp_fournisseur"/>
+			</mx:Form>
+
+			<!-- TIERS -->
+			<mx:Form label="Tiers" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:tiersTable width="100%" height="100%" id="comp_tiers"/>
+			</mx:Form>
+				
+			<!-- UTILISATEUR -->
+			<mx:Form label="Utilisateur" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:utilisateurTable width="100%" height="100%" id="comp_utilisateur"/>
+			</mx:Form>
+
+			<!-- ACTION -->
+			<mx:Form label="Action" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:actionTable width="100%" height="100%" id="comp_action"/>
+			</mx:Form>
+
+			<!-- SATISFACTION -->
+			<mx:Form label="Satisfaction" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:satisfactionTable width="100%" height="100%" id="comp_satisfaction"/>
+			</mx:Form>
+										
+			<!-- TABLEAU DE BORD -->		
+			<mx:Form label="Tableau de bord" width="100%" height="100%"
+				showEffect="{wipeRight}" hideEffect="{wipeLeft}"
+				 paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+				<MyComp:dashboard width="100%" height="100%" id="comp_tb"/>
+			</mx:Form>
+			
+		</mx:ViewStack>
+	</mx:VBox>
+
+<mx:WipeLeft duration="500" id="wipeLeft"/>
+<mx:WipeRight duration="500" id="wipeRight"/>
+
+
+</mx:Application>

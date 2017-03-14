@@ -1,0 +1,74 @@
+/* CSS file */
+
+global
+{
+	backgroundAlpha: 1.0;
+	borderColor: #8D8E98;
+	themeColor: #8D8E98;
+	controlBarStyleName: panelControlBar;
+	
+	
+}
+
+FormItemLabel
+{
+	textAlign: left;
+	labelwidth:70px;
+}
+TitleWindow
+{
+	backgroundColor: #8D8E98;
+	backgroundAlpha: 1.0;
+	borderColor: #8D8E98;
+	themeColor: #8D8E98;
+	borderAlpha: 1.0;
+}
+
+Application
+{
+	backgroundColor: #F0F0F0;
+	backgroundAlpha: 1.0;
+	borderColor: #8D8E98;
+	themeColor: #8D8E98;
+}
+
+Panel
+{
+	backgroundColor: #FFFFFF;
+	backgroundAlpha: 1.0;
+	borderColor: #8D8E98;
+	themeColor: #8D8E98;
+}
+
+
+TextInput
+{
+	disabledColor:#000000
+}
+ 
+DateField
+{
+	disabledColor:#000000
+}
+
+DataGrid
+{
+	disabledColor:#000000
+}
+
+ComboBox
+{
+	disabledColor:#000000
+}
+
+Button
+{
+	
+}
+
+Label
+{
+	disabledColor:#000000
+}
+
+  

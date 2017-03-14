@@ -1,0 +1,202 @@
+<?xml version="1.0"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="650" height="450" 
+	title="Fiche Attestation Fournisseur " creationComplete="load();initButton();"
+	xmlns:components="com.hillelcoren.components.*"
+	titleIcon="@Embed(source='assets/icones/fournisseur_attestation.png')" showCloseButton="true" close="fermer();" backgroundColor="#DFAF2C" borderColor="#DFAF2C" initialize="createListenerfournisseur_attestation(event)" mouseOver="refresh_fournisseur_attestation();">
+	<mx:Script source="fournisseur_attestation_script.as" />
+	<mx:Script source="global.as" />
+	<mx:Script source="fournisseur_attestationItem_script.as" />
+
+	<!-- Fomat nombre -->
+	<mx:NumberFormatter thousandsSeparatorTo=" " thousandsSeparatorFrom=" " id="numberFormatter" precision="2" rounding="up"/>
+
+	<!-- Fomat date -->
+	<mx:DateFormatter formatString="DD/MM/YYYY" id="dateFormatter" />
+	
+	<!-- HTTP SERVICE, Pour lecture de la fiche -->
+   <mx:HTTPService id="restfournisseur_attestationRead" showBusyCursor="true" result="onLoad(event)"/>
+
+   <!-- HTTP SERVICE, Pour permission de la fiche -->
+   <mx:HTTPService id="restPermission" showBusyCursor="true" result="permissionResult(event)" />
+
+	<!-- HTTP SERVICE, Pour suppression de la fiche -->
+   <mx:HTTPService id="restDelete" showBusyCursor="true" />
+
+   <!-- HTTP SERVICE, Pour les connexions -->
+   <mx:HTTPService id="restConnexion" method="POST" />
+   
+	<!-- HTTP SERVICE, sauvegarder les données create de la fiche -->
+   <mx:HTTPService id="restfournisseur_attestationCreate" url="fournisseur_attestationCreate.php" 
+   	useProxy="false" method="POST" showBusyCursor="true" result="onCreate(event)">
+   <mx:request xmlns="">
+	<fournisseur>{connexion_fournisseur.text}</fournisseur>
+<annee>{combo_annee.text}</annee>
+<cle>{text_cle.text}</cle>
+<creation_par>{text_creation_par.text}</creation_par>
+<date_creation>{date_date_creation.text}</date_creation>
+<date_modification>{date_date_modification.text}</date_modification>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<modification_par>{text_modification_par.text}</modification_par>
+<note>{memo_note.text}</note>
+<pj_kbis>{fichier_text_pj_kbis.text}</pj_kbis>
+<pj_urssaf_rsi>{fichier_text_pj_urssaf_rsi.text}</pj_urssaf_rsi>
+<pj_autre>{fichier_text_pj_autre.text}</pj_autre>
+<date_attestation>{date_date_attestation.text}</date_attestation>
+<date_document>{date_date_document.text}</date_document>
+
+   </mx:request>
+   </mx:HTTPService>
+   
+   <!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+   <mx:HTTPService id="restfournisseur_attestationUpdate" url="fournisseur_attestationUpdate.php" 
+   	useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+   <mx:request xmlns="">
+	<fournisseur>{connexion_fournisseur.text}</fournisseur>
+<annee>{combo_annee.text}</annee>
+<cle>{text_cle.text}</cle>
+<creation_par>{text_creation_par.text}</creation_par>
+<date_creation>{date_date_creation.text}</date_creation>
+<date_modification>{date_date_modification.text}</date_modification>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<modification_par>{text_modification_par.text}</modification_par>
+<note>{memo_note.text}</note>
+<pj_kbis>{fichier_text_pj_kbis.text}</pj_kbis>
+<pj_urssaf_rsi>{fichier_text_pj_urssaf_rsi.text}</pj_urssaf_rsi>
+<pj_autre>{fichier_text_pj_autre.text}</pj_autre>
+<date_attestation>{date_date_attestation.text}</date_attestation>
+<date_document>{date_date_document.text}</date_document>
+
+   </mx:request>
+   </mx:HTTPService>
+ 
+<!-- HTTP VUES -->
+	
+ 
+<!-- HTTP SERVICE CONNEXION-->
+	<mx:HTTPService id="rest_connexion_fournisseur" showBusyCursor="true" result="rest_connexion_fournisseur_result();"/>
+
+
+<!-- HTTP SERVICE LOV-->
+		
+	
+<!-- VALIDATOR -->
+	<mx:StringValidator id="valid_fournisseur" source="{connexion_fournisseur}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_date_attestation" source="{date_date_attestation}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_date_document" source="{date_date_document}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+ 	
+		<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  width="100%" height="100%" >
+			<mx:VBox height="100%" width="100%" paddingTop="10">
+			<mx:TabNavigator id="tab_fournisseur_attestation" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all" change="send_selection()">
+				<mx:Canvas id="tab_fournisseur_attestation_Principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_fournisseur" label="Fournisseur" width="95%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%">
+<mx:VBox width="100%"><mx:TextInput id="connexion_fournisseur_complement"  editable="false" width="100%" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.fournisseur}"    toolTip="" doubleClickEnabled="true" doubleClick="OpenConnexionfournisseurItem()" /></mx:VBox>
+<mx:VBox width="0" visible="false"><mx:TextInput id="connexion_fournisseur" width="0" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.fournisseur_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionfournisseur();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_date_attestation" label="Date réception" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_date_attestation" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.date_attestation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"    toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_date_document" label="Date de l'attestation" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_date_document" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.date_document}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"    toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_note" label="Note" width="100%" height="100" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_note" wordWrap="true" editable="true" height="100" width="95%"  text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.note}"    toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_pj_kbis" label="KBIS" width="95%" labelWidth="150" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj_kbis"  width="150"  text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.pj_kbis}" toolTip=""/></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj_kbis" click="initFile_pj_kbis()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj_kbis" label="Ouvrir" click="openNewWindow_pj_kbis(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:FormItem id="formitem_pj_urssaf_rsi" label="Attestation URSSAF / RSI" width="95%" labelWidth="150" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj_urssaf_rsi"  width="150"  text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.pj_urssaf_rsi}" toolTip=""/></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj_urssaf_rsi" click="initFile_pj_urssaf_rsi()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj_urssaf_rsi" label="Ouvrir" click="openNewWindow_pj_urssaf_rsi(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:FormItem id="formitem_pj_autre" label="Autre" width="95%" labelWidth="150" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj_autre"  width="150"  text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.pj_autre}" toolTip=""/></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj_autre" click="initFile_pj_autre()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj_autre" label="Ouvrir" click="openNewWindow_pj_autre(event)"/></mx:VBox></mx:HBox></mx:FormItem>
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_fournisseur_attestation_Système" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_cle" label="cle" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="95%" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.cle}"   toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_creation_par" label="Création par" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="95%" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.creation_par}"   toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_date_creation" label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"    toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_creation" label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.heure_creation}"   toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_annee" label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.annee}"  toolTip="">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>2010</mx:String>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+<mx:String>2013</mx:String>
+<mx:String>2014</mx:String>
+<mx:String>2015</mx:String>
+<mx:String>2016</mx:String>
+<mx:String>2017</mx:String>
+<mx:String>2018</mx:String>
+<mx:String>2019</mx:String>
+<mx:String>2020</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_idfournisseur_attestation" label="ID" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idfournisseur_attestation" width="95%" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.idfournisseur_attestation}"   toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_modification_par" label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="95%" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.modification_par}"   toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_date_modification" label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"  toolTip=""/>
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_modification" label="Heure modification" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restfournisseur_attestationRead.lastResult.fournisseur_attestationRead.item.heure_modification}"   toolTip=""/>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+			</mx:TabNavigator>
+			</mx:VBox>
+		</mx:Canvas>
+		<mx:HBox id="hbox_fournisseur_attestation_btn" width="100%" horizontalAlign="right">
+
+			<mx:Button id="btn_enregistrer" click="enregistrer()" label="Enregistrer">
+				<mx:icon>@Embed(source='assets/icones/enregistrer.png')</mx:icon>
+			</mx:Button>
+			
+			<mx:Button label="Annuler" id="btn_fermer" click="fermer()">
+				<mx:icon>@Embed(source='assets/icones/fermer.png')</mx:icon>
+			</mx:Button>
+
+			<mx:Button label="Enregistrer sans fermer" id="btn_appliquer" click="appliquer()">
+				<mx:icon>@Embed(source='assets/icones/appliquer.png')</mx:icon>
+			</mx:Button>
+			
+			<mx:Button label="Imprimer" id="btn_imprimer" click="imprimer()">
+				<mx:icon>@Embed(source='assets/icones/imprimer.png')</mx:icon>
+			</mx:Button>
+			
+			<mx:Button label="Dupliquer" id="btn_copier" click="copier()">
+				<mx:icon>@Embed(source='assets/icones/enregistrer.png')</mx:icon>
+			</mx:Button>
+			
+		</mx:HBox>
+
+</mx:TitleWindow>
+
+
+

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			import mx.controls.Alert;
+			import mx.controls.Text;
+			private var urlRequest:URLRequest;
+			private var fileReferenceList:FileReferenceList;
+			private var serverSideScript:String = "upload.php";
+			
+			private function initFile_fichier1():void {
+				urlRequest = new URLRequest(serverSideScript);
+				fileReferenceList = new FileReferenceList();
+				fileReferenceList.addEventListener(Event.SELECT, fileSelectedHandler_fichier1);
+				fileReferenceList.browse();
+			}
+			
+			private function fileSelectedHandler_fichier1(event:Event):void {
+				var fileReference:FileReference;
+				var fileReferenceList:FileReferenceList = FileReferenceList(event.target);
+				var fileList:Array = fileReferenceList.fileList;
+
+				// get the first file that the user chose
+				fileReference = FileReference(fileList[0]);
+				
+				// upload the file to the server side script
+				fileReference.addEventListener(Event.COMPLETE, uploadCompleteHandler_fichier1);
+				fileReference.upload(urlRequest);
+				
+				// update the status text
+				text_fichier1.text = "Uploading...";
+			}
+			
+			private function uploadCompleteHandler_fichier1(event:Event):void {
+				text_fichier1.text = event.target.name;
+			}
+		
+		     public function openNewWindow_fichier1(event:MouseEvent):void {
+		        var u:URLRequest = new URLRequest("files/"+text_fichier1.text);
+		        navigateToURL(u,"_blank");
+		     }
+			private function initFile_fichier2():void {
+				urlRequest = new URLRequest(serverSideScript);
+				fileReferenceList = new FileReferenceList();
+				fileReferenceList.addEventListener(Event.SELECT, fileSelectedHandler_fichier2);
+				fileReferenceList.browse();
+			}
+			
+			private function fileSelectedHandler_fichier2(event:Event):void {
+				var fileReference:FileReference;
+				var fileReferenceList:FileReferenceList = FileReferenceList(event.target);
+				var fileList:Array = fileReferenceList.fileList;
+
+				// get the first file that the user chose
+				fileReference = FileReference(fileList[0]);
+				
+				// upload the file to the server side script
+				fileReference.addEventListener(Event.COMPLETE, uploadCompleteHandler_fichier2);
+				fileReference.upload(urlRequest);
+				
+				// update the status text
+				text_fichier2.text = "Uploading...";
+			}
+			
+			private function uploadCompleteHandler_fichier2(event:Event):void {
+				text_fichier2.text = event.target.name;
+			}			
+		]]>
+	</mx:Script>
+	<mx:FormItem label="Fichier 1" width="100%" labelWidth="130" visible="true" enabled="true"  >
+		<mx:HBox>
+			<mx:VBox>
+				<mx:TextInput id="text_fichier1" width="100%" />
+			</mx:VBox>
+			<mx:VBox>
+				<mx:Button click="initFile_fichier1()" label="..."/>
+			</mx:VBox>
+			<mx:VBox>
+				<mx:Button label="Ouvrir" click="openNewWindow_fichier1(event)"/>
+			</mx:VBox>
+		</mx:HBox>
+	</mx:FormItem>
+	<mx:FormItem label="Fichier 2" width="100%" labelWidth="130" visible="true" enabled="true"  >
+		<mx:HBox>
+			<mx:VBox>
+				<mx:TextInput id="text_fichier2" width="100%" />
+			</mx:VBox>
+			<mx:Button click="initFile_fichier2()" label="..."/>
+			<mx:VBox>
+				<mx:Button label="Ouvrir"/>
+			</mx:VBox>
+		</mx:HBox>
+	</mx:FormItem>
+</mx:Application>

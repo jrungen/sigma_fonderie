@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="contactTable_script.as" />
+<mx:Script source="contact_script.as" />
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restcontactList" url="contactList.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restcontactRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restcontactUpdate" url="contactUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<cle>{text_cle.text}</cle>
+<tel>{text_tel.text}</tel>
+<nom>{text_nom.text}</nom>
+<prenom>{text_prenom.text}</prenom>
+<mobile>{text_mobile.text}</mobile>
+<date_creation>{date_date_creation.text}</date_creation>
+<creation_par>{text_creation_par.text}</creation_par>
+<fonction>{text_fonction.text}</fonction>
+<fax>{text_fax.text}</fax>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<societe>{connexion_societe.text}</societe>
+<email>{text_email.text}</email>
+<date_modification>{date_date_modification.text}</date_modification>
+<modification_par>{text_modification_par.text}</modification_par>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<annee>{combo_annee.text}</annee>
+
+</mx:request>
+</mx:HTTPService>
+
+
+
+<mx:HTTPService id="rest_connexion_societe" showBusyCursor="true" result="rest_connexion_societe_result();"/>
+
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+			<mx:String>nom</mx:String>
+<mx:String>nom</mx:String>
+<mx:String>prenom</mx:String>
+<mx:String>email</mx:String>
+
+	</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchcontact()"/>
+<mx:Label text="Filtre" />
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+
+	</mx:dataProvider>			
+</mx:ComboBox>
+<mx:Button label="Afficher" click="searchcontact()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+  <mx:XMLList>
+					<menuitem label="Nouveau" />
+					<menuitem label="Enregistrer" />
+					<menuitem label="Supprimer" />
+					<menuitem label="Fermer" />
+			
+	  </mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+
+<mx:VDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid" width="100%" height="100%" dataProvider="{restcontactList.lastResult.contactList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_contact">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="idcontact" dataField="idcontact"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="Clé" dataField="cle"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="Nom" dataField="nom"  visible="true" />
+
+	</mx:columns>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="false" width="0%" height="0%">
+	<mx:TabNavigator id="tab_contact" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_contact_Principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Nom" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nom" width="95%" text="{restcontactRead.lastResult.contactRead.item.nom}"  />
+</mx:FormItem>
+<mx:FormItem label="Prénom" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_prenom" width="95%" text="{restcontactRead.lastResult.contactRead.item.prenom}"  />
+</mx:FormItem>
+<mx:FormItem label="Fonction" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_fonction" width="95%" text="{restcontactRead.lastResult.contactRead.item.fonction}"  />
+</mx:FormItem>
+<mx:FormItem label="Société" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_societe"  editable="false" width="100%" text="{restcontactRead.lastResult.contactRead.item.societe}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionsociete();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Téléphone" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tel" width="95%" text="{restcontactRead.lastResult.contactRead.item.tel}"   />
+</mx:FormItem>
+<mx:FormItem label="Mobile" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_mobile" width="95%" text="{restcontactRead.lastResult.contactRead.item.mobile}"   />
+</mx:FormItem>
+<mx:FormItem label="Fax" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_fax" width="95%" text="{restcontactRead.lastResult.contactRead.item.fax}"   />
+</mx:FormItem>
+<mx:FormItem label="Email" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_email" width="95%" text="{restcontactRead.lastResult.contactRead.item.email}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_contact_Système" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Clé" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="95%" text="{restcontactRead.lastResult.contactRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restcontactRead.lastResult.contactRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restcontactRead.lastResult.contactRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restcontactRead.lastResult.contactRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restcontactRead.lastResult.contactRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restcontactRead.lastResult.contactRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="idcontact" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idcontact" width="95%" text="{restcontactRead.lastResult.contactRead.item.idcontact}"   />
+</mx:FormItem>
+<mx:FormItem label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restcontactRead.lastResult.contactRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restcontactRead.lastResult.contactRead.item.modification_par}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:VDividedBox>
+</mx:VBox>
+</mx:Canvas>
+

@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="actionTable_script.as" />
+<mx:Script source="action_script.as" />
+<mx:Script source="action_script_table.as" />
+
+<!-- Fomat nombre -->
+<mx:NumberFormatter thousandsSeparatorTo=" " thousandsSeparatorFrom=" " id="numberFormatter" precision="2" rounding="up"/>
+
+<!-- Fomat date -->
+<mx:DateFormatter formatString="DD/MM/YYYY" id="dateFormatter" />
+
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restactionList" url="actionList.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="initDG();">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+<group>{Application.application.gsGroup}</group>
+<user>{Application.application.gsUser}</user>
+<sql>{encodeURIComponent(text_sql.text)}</sql>
+<priorite>{search_combo_priorite.text}</priorite>
+<statut>{search_combo_statut.text}</statut>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restactionRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, Pour permission de la fiche -->
+<mx:HTTPService id="restPermission" showBusyCursor="true" result="permissionResult(event)" />
+
+<!-- HTTP SERVICE, Pour suppression de la fiche -->
+<mx:HTTPService id="restDelete" showBusyCursor="true" />
+
+<mx:HTTPService id="restVue" showBusyCursor="true"/>
+
+
+<!-- HTTP SERVICE, Pour exporter la table -->
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restactionList_export" url="actionList_export.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<group>{Application.application.gsGroup}</group>
+<priorite>{search_combo_priorite.text}</priorite>
+<statut>{search_combo_statut.text}</statut>
+
+</mx:request>
+</mx:HTTPService>
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restactionUpdate" url="actionUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<nom>{text_nom.text}</nom>
+<notes>{memo_notes.text}</notes>
+<cle>{text_cle.text}</cle>
+<date_creation>{date_date_creation.text}</date_creation>
+<fichier_joint>{fichier_text_fichier_joint.text}</fichier_joint>
+<creation_par>{text_creation_par.text}</creation_par>
+<type>{connexion_type.text}</type>
+<date_modification>{date_date_modification.text}</date_modification>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<modification_par>{text_modification_par.text}</modification_par>
+<statut>{combo_statut.text}</statut>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<priorite>{combo_priorite.text}</priorite>
+<annee>{combo_annee.text}</annee>
+<date_fin>{date_date_fin.text}</date_fin>
+<heure_fin>{text_heure_fin.text}</heure_fin>
+<societe>{connexion_societe.text}</societe>
+<projet>{connexion_projet.text}</projet>
+<fournisseur>{connexion_fournisseur.text}</fournisseur>
+<utilisateur>{connexion_utilisateur.text}</utilisateur>
+<utilisateur_cc>{connexion_utilisateur_cc.text}</utilisateur_cc>
+<date_debut>{date_date_debut.text}</date_debut>
+<heure_debut>{text_heure_debut.text}</heure_debut>
+<duree>{text_duree.text}</duree>
+
+</mx:request>
+</mx:HTTPService>
+
+
+
+<mx:HTTPService id="rest_connexion_type" showBusyCursor="true" result="rest_connexion_type_result();"/>
+<mx:HTTPService id="rest_connexion_societe" showBusyCursor="true" result="rest_connexion_societe_result();"/>
+<mx:HTTPService id="rest_connexion_projet" showBusyCursor="true" result="rest_connexion_projet_result();"/>
+<mx:HTTPService id="rest_connexion_fournisseur" showBusyCursor="true" result="rest_connexion_fournisseur_result();"/>
+<mx:HTTPService id="rest_connexion_utilisateur" showBusyCursor="true" result="rest_connexion_utilisateur_result();"/>
+<mx:HTTPService id="rest_connexion_utilisateur_cc" showBusyCursor="true" result="rest_connexion_utilisateur_cc_result();"/>
+
+
+<!-- HTTP SERVICE LOV-->
+		
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%" id="ApplicationControlBar_action">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+			<mx:String>nom</mx:String>
+<mx:String>fichier_joint</mx:String>
+<mx:String>type</mx:String>
+<mx:String>societe</mx:String>
+<mx:String>utilisateur</mx:String>
+
+	</mx:dataProvider>
+</mx:ComboBox>
+<mx:Label text="Priorité" /><mx:ComboBox id="search_combo_priorite" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>1</mx:String>
+<mx:String>2</mx:String>
+<mx:String>3</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+<mx:Label text="Statut" /><mx:ComboBox id="search_combo_statut" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>A faire</mx:String>
+<mx:String>Terminée</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchaction()"/>
+<mx:Label text="Filtre" />
+<!--
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+
+	</mx:dataProvider>			
+</mx:ComboBox>
+-->
+
+<mx:ComboBox id="combo_filtre" width="100%" dataProvider="{restVue.lastResult.vueList.item}" labelField="intitule" />
+
+<mx:Button label="Afficher" click="searchaction()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+<mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Supprimer" />
+	<menuitem label="Exporter vers Excel" />
+	<menuitem label="Filtre avancé" />
+</mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+<mx:VBox id="advancedFilter_action" height="0" width="100%" visible="false">
+	<mx:HBox height="100%" width="100%">
+		<mx:TextArea width="100%" height="100%" id="text_sql"/>
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Button label="Fermer" click="advancedFilter_close()" />
+	</mx:HBox>
+</mx:VBox>
+
+<mx:HDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid_action" width="100%" height="100%" dataProvider="{restactionList.lastResult.actionList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" 
+	doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_action" displayItemsExpanded="true">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="Date début" dataField="date_debut"  visible="true" formatter="{dateFormatter}" />
+<mx:AdvancedDataGridColumn headerText="Date fin" dataField="date_fin"  visible="true" formatter="{dateFormatter}" />
+<mx:AdvancedDataGridColumn headerText="Client" dataField="societe"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="Nom" dataField="nom"  visible="true" width="250" />
+<mx:AdvancedDataGridColumn headerText="Type" dataField="type"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="Statut" dataField="statut"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="Utilisateur" dataField="utilisateur"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="Durée" dataField="duree"  visible="true" textAlign="right" formatter="{numberFormatter}" />
+<mx:AdvancedDataGridColumn headerText="idaction" dataField="idaction"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+
+	</mx:columns>
+		<mx:rendererProviders>
+		<mx:AdvancedDataGridRendererProvider
+			dataField="summary"
+			columnIndex="3"
+			columnSpan="0"
+			renderer="renderers.SummaryText" />
+	</mx:rendererProviders>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="true" width="0%" height="100%">
+	<mx:TabNavigator id="tab_action" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_action_principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_nom" label="Nom" width="100%" labelWidth="70" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nom" width="95%" text="{restactionRead.lastResult.actionRead.item.nom}"   editable="false" />
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Qualification"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem id="formitem_type" label="Type" width="95%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_type_complement"  editable="false" width="100%" text="{restactionRead.lastResult.actionRead.item.type}"   doubleClickEnabled="true" doubleClick="OpenConnexiontypeItem()" />
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_type" width="0" text="{restactionRead.lastResult.actionRead.item.type_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexiontype();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_statut" label="Statut" width="100%" labelWidth="70" visible="true" required="true" >
+<mx:ComboBox id="combo_statut" width="150" text="{restactionRead.lastResult.actionRead.item.statut}"  enabled="false">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>A faire</mx:String>
+<mx:String>Terminée</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_priorite" label="Priorité" width="100%" labelWidth="70" visible="true" required="false" >
+<mx:ComboBox id="combo_priorite" width="50" text="{restactionRead.lastResult.actionRead.item.priorite}"  enabled="false">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>1</mx:String>
+<mx:String>2</mx:String>
+<mx:String>3</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Contact"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem id="formitem_societe" label="Client" width="95%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_societe_complement"  editable="false" width="100%" text="{restactionRead.lastResult.actionRead.item.societe}"   doubleClickEnabled="true" doubleClick="OpenConnexionsocieteItem()" />
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_societe" width="0" text="{restactionRead.lastResult.actionRead.item.societe_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionsociete();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_projet" label="projet" width="95%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_projet_complement"  editable="false" width="100%" text="{restactionRead.lastResult.actionRead.item.projet}"   doubleClickEnabled="true" doubleClick="OpenConnexionprojetItem()" />
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_projet" width="0" text="{restactionRead.lastResult.actionRead.item.projet_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionprojet();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_fournisseur" label="Fournisseur" width="95%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_fournisseur_complement"  editable="false" width="100%" text="{restactionRead.lastResult.actionRead.item.fournisseur}"   doubleClickEnabled="true" doubleClick="OpenConnexionfournisseurItem()" />
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_fournisseur" width="0" text="{restactionRead.lastResult.actionRead.item.fournisseur_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionfournisseur();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_utilisateur" label="Utilisateur" width="95%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_utilisateur_complement"  editable="false" width="100%" text="{restactionRead.lastResult.actionRead.item.utilisateur}"   doubleClickEnabled="true" doubleClick="OpenConnexionutilisateurItem()" />
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_utilisateur" width="0" text="{restactionRead.lastResult.actionRead.item.utilisateur_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionutilisateur();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_utilisateur_cc" label="Informer" width="95%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_utilisateur_cc_complement"  editable="false" width="100%" text="{restactionRead.lastResult.actionRead.item.utilisateur_cc}"   doubleClickEnabled="true" doubleClick="OpenConnexionutilisateur_ccItem()" />
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_utilisateur_cc" width="0" text="{restactionRead.lastResult.actionRead.item.utilisateur_cc_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionutilisateur_cc();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Début"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem id="formitem_date_debut" label="Date début" width="100%" labelWidth="70" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date_debut" width="90" text="{restactionRead.lastResult.actionRead.item.date_debut}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']" monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"  enabled="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_debut" label="H.début" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_heure_debut" width="90" text="{restactionRead.lastResult.actionRead.item.heure_debut}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_duree" label="Durée" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_duree" width="90" text="{restactionRead.lastResult.actionRead.item.duree}"   restrict="[0-9.\-]" textAlign="right"  editable="false"/>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_notes" label="Notes" width="100%" height="213" labelWidth="70" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_notes" wordWrap="true" editable="false" height="213" width="95%" text="{restactionRead.lastResult.actionRead.item.notes}" />
+</mx:FormItem>
+<mx:FormItem id="formitem_fichier_joint" label="Fichier joint" width="95%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_fichier_joint"  width="150"  text="{restactionRead.lastResult.actionRead.item.fichier_joint}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_fichier_joint" click="initFile_fichier_joint()" label="..."  enabled="false"/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_fichier_joint" label="Ouvrir" click="openNewWindow_fichier_joint(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Fin"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem id="formitem_date_fin" label="Date fin" width="100%" labelWidth="70" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date_fin" width="90" text="{restactionRead.lastResult.actionRead.item.date_fin}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_fin" label="H.fin" width="100%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_heure_fin" width="90" text="{restactionRead.lastResult.actionRead.item.heure_fin}"    editable="false"/>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_action_Système" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_idaction" label="idaction" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idaction" width="120" text="{restactionRead.lastResult.actionRead.item.idaction}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_date_creation" label="Date création " width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="120" text="{restactionRead.lastResult.actionRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']" monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"  enabled="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_date_modification" label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="120" text="{restactionRead.lastResult.actionRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']" monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"  enabled="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_creation" label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restactionRead.lastResult.actionRead.item.heure_creation}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_modification" label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restactionRead.lastResult.actionRead.item.heure_modification}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_annee" label="Année" width="100%" labelWidth="120" visible="true" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restactionRead.lastResult.actionRead.item.annee}"  enabled="false">
+<mx:dataProvider>
+<mx:String>
+2010
+2011
+2012
+2013
+2014
+2015
+2016
+2017
+2018
+2019
+2020</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_cle" label="cle" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="95%" text="{restactionRead.lastResult.actionRead.item.cle}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_creation_par" label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="95%" text="{restactionRead.lastResult.actionRead.item.creation_par}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_modification_par" label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="95%" text="{restactionRead.lastResult.actionRead.item.modification_par}"    editable="false"/>
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:HDividedBox>
+
+<mx:HBox width="100%" height="20" backgroundColor="#F2F2F2" paddingLeft="2" 
+	paddingTop="2" paddingRight="2" paddingBottom="2" textAlign="right"
+	backgroundAlpha="0.8">
+	<mx:Label id="label_etat" text="{datagrid_action.dataProvider.length} fiches trouvées" width="100%" textAlign="right"/>
+</mx:HBox>
+
+</mx:VBox>
+</mx:Canvas>
+

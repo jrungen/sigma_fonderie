@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="450" height="500" 
+	title="Imprimer" creationComplete="load();"
+	xmlns:components="com.hillelcoren.components.*"
+	titleIcon="@Embed(source='assets/icones/imprimer.png')" showCloseButton="true" close="fermer();"
+	>
+	
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+		import mx.managers.PopUpManager;
+		import mx.events.ListEvent;
+		
+		public var itemId:String;
+		public var sIntitule:String='';
+		public var sFile:String='';
+		public var sCategorie:String='';
+		
+		private function load():void {
+			PopUpManager.centerPopUp(this);
+			restmodele_lettreList.url = "modele_lettreList.php?categorie="+sCategorie; 
+			restmodele_lettreList.send();
+			//Alert.show(itemId);
+		}
+		
+		private function fermer():void {
+			PopUpManager.removePopUp(this);
+		}
+
+		private function fusionner():void {
+			if(sIntitule!=''){ 
+				navigateToURL( new URLRequest( sCategorie+'WordMerge.php?id='+itemId+'&file='+sFile), "_blank" );
+			}else{
+				Alert.show('Aucun modèle de sélectionné, merci de sélectionner un modèle');	
+			}
+		}
+		
+		private function select(e:ListEvent):void {
+			sIntitule = e.currentTarget.selectedItem.intitule;
+			sFile = e.currentTarget.selectedItem.fichier;
+			sCategorie = e.currentTarget.selectedItem.categorie;
+			
+		}
+	]]>
+</mx:Script>
+<mx:HTTPService id="restmodele_lettreList" 
+useProxy="false" showBusyCursor="true" />
+	
+<mx:Canvas width="100%" height="100%" backgroundAlpha="1.0">
+<mx:VBox height="100%" width="100%" paddingTop="10">
+<mx:HBox width="100%" height="25" paddingTop="0" paddingRight="10">
+	<mx:Button label="Fusionner" id="btn_fusionner" borderColor="#FFFFFF" click="fusionner()">
+	<mx:icon>@Embed(source='assets/icones/imprimer.png')</mx:icon>
+	</mx:Button>
+</mx:HBox>
+<mx:HBox width="100%" height="100%" paddingTop="0" paddingRight="10">	
+	<mx:AdvancedDataGrid  horizontalScrollPolicy="on" id="datagrid" width="100%" height="100%" 
+		dataProvider="{restmodele_lettreList.lastResult.modele_lettreList.item}" 
+		doubleClickEnabled="true" itemClick="select(event)" >
+	<mx:columns><mx:AdvancedDataGridColumn headerText="id" dataField="id" visible="false"/>
+	<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+	<mx:AdvancedDataGridColumn headerText="Initule" dataField="intitule" visible="true" />
+	<mx:AdvancedDataGridColumn headerText="Fichier" dataField="fichier" visible="false" />
+	<mx:AdvancedDataGridColumn headerText="Catégorie" dataField="categorie" visible="false" />
+	</mx:columns>
+	</mx:AdvancedDataGrid>
+</mx:HBox>
+</mx:VBox>
+</mx:Canvas>
+</mx:TitleWindow>

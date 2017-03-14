@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="640" height="480" creationComplete="load();"
+	xmlns:crm="*">
+	<mx:Script source="facture_fournisseur_ligneConnexion_script.as" />
+<mx:Script>
+	<![CDATA[
+import mx.core.Application;
+import mx.controls.Alert;
+import mx.managers.PopUpManager;
+import mx.controls.TextInput;
+
+public var targetComponent:TextInput;
+public var targetComplement:TextInput;
+public var categorie:String;
+public var filtre:String;
+public var categorie_source:String;
+public var connexion_source:String;
+
+
+
+private function load():void {
+	PopUpManager.centerPopUp(this);
+	restConnexion.url = "facture_fournisseur_ligneConnexion.php?search=&filtre="+filtre;
+	restConnexion.send();
+	onLoad_facture_fournisseur_ligneConnexion();
+}
+
+private function close():void {
+	PopUpManager.removePopUp(this);
+}
+
+private function selectItem():void {
+	targetComponent.text = String(datagrid_connexion.selectedItem.cle);
+	targetComplement.text = String(datagrid_connexion.selectedItem.cle);
+	close();
+}
+private function unselectItem():void {
+	targetComponent.text = "";
+	targetComplement.text = "";
+	close();
+}
+
+
+private function searchconnexion():void{
+	restConnexion.url = "facture_fournisseur_ligneConnexion.php?search="+textSearch.text+"&filtre="+filtre;
+	restConnexion.send();
+}
+private function newItem():void{
+if(categorie=='facture_fournisseur_ligne'){
+var vfacture_fournisseur_ligneItem:facture_fournisseur_ligneItem = facture_fournisseur_ligneItem(PopUpManager.createPopUp(this,facture_fournisseur_ligneItem,true));
+vfacture_fournisseur_ligneItem.mode = '1';
+}
+			
+}   
+
+private function openItem():void{	
+if(categorie=='facture_fournisseur_ligne'){
+var vfacture_fournisseur_ligneItem:facture_fournisseur_ligneItem = facture_fournisseur_ligneItem(PopUpManager.createPopUp(this,facture_fournisseur_ligneItem,true));
+vfacture_fournisseur_ligneItem.text_cle.text = datagrid_connexion.selectedItem.cle;	
+}
+
+}
+
+private function delete_facture_fournisseur_ligne(id:String):void{
+restDelete.url = "delete.php?categorie=facture_fournisseur_ligne&id="+id;
+restDelete.send();
+searchconnexion();
+}  	
+	]]>
+</mx:Script>
+	
+<mx:HTTPService id="restConnexion" url="connexion.php" method="POST" showBusyCursor="true" />
+
+<!-- HTTP SERVICE, Pour suppression de la fiche -->
+<mx:HTTPService id="restDelete" showBusyCursor="true" />
+   
+<!-- HTTP SERVICE pour la recherche -->
+<mx:HTTPService id="restSearchConnexion" url="connexion.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+</mx:request>
+</mx:HTTPService>
+
+<mx:VBox width="100%" height="100%" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+<mx:HBox width="100%" height="30">
+		<mx:TextInput id="textSearch" change="searchconnexion()"/>
+		<mx:Button label="" click="searchconnexion()"  id="btn_Refresh" borderColor="#FFFFFF">
+		<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+		</mx:Button>
+</mx:HBox>
+<mx:HBox width="100%" height="100%">
+<mx:AdvancedDataGrid x="10" y="10" width="100%" height="100%" dataProvider="{restConnexion.lastResult.items.item}"
+	doubleClickEnabled="true" itemDoubleClick="selectItem()" id="datagrid_connexion">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="Type de dépenses" dataField="type_depenses"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="true" />
+<mx:AdvancedDataGridColumn headerText="idfacture_fournisseur_ligne" dataField="idfacture_fournisseur_ligne"  visible="true" />
+
+	</mx:columns>
+</mx:AdvancedDataGrid>	
+</mx:HBox>
+<mx:HBox width="100%" height="30" textAlign="right">
+	<mx:Button id="btn_compteConnexion_ajouter" label="Ajouter" click="newItem();"/>
+	<mx:Button id="btn_compteConnexion_modifier" label="Modifier" click="openItem();"/>
+	<mx:Button id="btn_compteConnexion_annuler" label="Annuler" click="close();"/>
+	<mx:Button id="btn_compteConnexion_supprimer" label="Supprimer" click="delete_facture_fournisseur_ligne(datagrid_connexion.selectedItem.idfacture_fournisseur_ligne);"/>
+	<mx:Button id="btn_compteConnexion_deselectionner" label="Déselectionner" click="unselectItem();"/>
+	
+</mx:HBox>
+</mx:VBox>
+
+
+
+</mx:TitleWindow>
+

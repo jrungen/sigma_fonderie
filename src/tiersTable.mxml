@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="tiersTable_script.as" />
+<mx:Script source="tiers_script.as" />
+<mx:Script source="tiers_script_table.as" />
+
+<!-- Fomat nombre -->
+<mx:NumberFormatter thousandsSeparatorTo=" " thousandsSeparatorFrom=" " id="numberFormatter" precision="2" rounding="up"/>
+
+<!-- Fomat date -->
+<mx:DateFormatter formatString="DD/MM/YYYY" id="dateFormatter" />
+
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="resttiersList" url="tiersList.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="initDG();">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+<group>{Application.application.gsGroup}</group>
+<user>{Application.application.gsUser}</user>
+<sql>{encodeURIComponent(text_sql.text)}</sql>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="resttiersRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, Pour permission de la fiche -->
+<mx:HTTPService id="restPermission" showBusyCursor="true" result="permissionResult(event)" />
+
+<!-- HTTP SERVICE, Pour suppression de la fiche -->
+<mx:HTTPService id="restDelete" showBusyCursor="true" />
+
+<mx:HTTPService id="restVue" showBusyCursor="true"/>
+
+
+<!-- HTTP SERVICE, Pour exporter la table -->
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="resttiersList_export" url="tiersList_export.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<group>{Application.application.gsGroup}</group>
+
+</mx:request>
+</mx:HTTPService>
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="resttiersUpdate" url="tiersUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<cle>{text_cle.text}</cle>
+<civilite>{combo_civilite.text}</civilite>
+<creation_par>{text_creation_par.text}</creation_par>
+<date_creation>{date_date_creation.text}</date_creation>
+<nom>{text_nom.text}</nom>
+<date_modification>{date_date_modification.text}</date_modification>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<modification_par>{text_modification_par.text}</modification_par>
+<prenom>{text_prenom.text}</prenom>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<societe>{text_societe.text}</societe>
+<service>{text_service.text}</service>
+<annee>{combo_annee.text}</annee>
+<adresse>{text_adresse.text}</adresse>
+<adresse2>{text_adresse2.text}</adresse2>
+<cp>{text_cp.text}</cp>
+<ville>{text_ville.text}</ville>
+<tel>{text_tel.text}</tel>
+<compte_tiers>{text_compte_tiers.text}</compte_tiers>
+<fax>{text_fax.text}</fax>
+<tva_intra>{text_tva_intra.text}</tva_intra>
+<email>{text_email.text}</email>
+<siret>{text_siret.text}</siret>
+<pays>{connexion_pays.text}</pays>
+<nouveau>{combo_nouveau.text}</nouveau>
+
+</mx:request>
+</mx:HTTPService>
+
+
+
+<mx:HTTPService id="rest_connexion_pays" showBusyCursor="true" result="rest_connexion_pays_result();"/>
+
+
+<!-- HTTP SERVICE LOV-->
+		
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%" id="ApplicationControlBar_tiers">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+			<mx:String>cle</mx:String>
+<mx:String>nom</mx:String>
+<mx:String>prenom</mx:String>
+<mx:String>societe</mx:String>
+<mx:String>service</mx:String>
+<mx:String>cp</mx:String>
+<mx:String>ville</mx:String>
+<mx:String>tel</mx:String>
+<mx:String>email</mx:String>
+
+	</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchtiers()"/>
+<mx:Label text="Filtre" />
+<!--
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+
+	</mx:dataProvider>			
+</mx:ComboBox>
+-->
+
+<mx:ComboBox id="combo_filtre" width="100%" dataProvider="{restVue.lastResult.vueList.item}" labelField="intitule" />
+
+<mx:Button label="Afficher" click="searchtiers()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+<mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Supprimer" />
+	<menuitem label="Exporter vers Excel" />
+	<menuitem label="Filtre avancé" />
+</mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+<mx:VBox id="advancedFilter_tiers" height="0" width="100%" visible="false">
+	<mx:HBox height="100%" width="100%">
+		<mx:TextArea width="100%" height="100%" id="text_sql"/>
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Button label="Fermer" click="advancedFilter_close()" />
+	</mx:HBox>
+</mx:VBox>
+
+<mx:HDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid_tiers" width="100%" height="100%" dataProvider="{resttiersList.lastResult.tiersList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" 
+	doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_tiers" displayItemsExpanded="true">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="Clé" dataField="cle"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="idtiers" dataField="idtiers"  visible="false" />
+<mx:AdvancedDataGridColumn headerText="Civilité" dataField="civilite"  visible="true" width="110" />
+<mx:AdvancedDataGridColumn headerText="Nom" dataField="nom"  visible="true" width="150" />
+<mx:AdvancedDataGridColumn headerText="Service" dataField="service"  visible="true" width="150" />
+<mx:AdvancedDataGridColumn headerText="Société" dataField="societe"  visible="true" width="150" />
+<mx:AdvancedDataGridColumn headerText="Prénom" dataField="prenom"  visible="true" width="150" />
+<mx:AdvancedDataGridColumn headerText="Email" dataField="email"  visible="true" width="150" />
+
+	</mx:columns>
+		<mx:rendererProviders>
+		<mx:AdvancedDataGridRendererProvider
+			dataField="summary"
+			columnIndex="3"
+			columnSpan="0"
+			renderer="renderers.SummaryText" />
+	</mx:rendererProviders>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="false" width="0%" height="0%">
+	<mx:TabNavigator id="tab_tiers" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_tiers_Principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_civilite" label="Civilité" width="100%" labelWidth="70" visible="true" required="true" >
+<mx:ComboBox id="combo_civilite" width="150" text="{resttiersRead.lastResult.tiersRead.item.civilite}"  enabled="false">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Mademoiselle</mx:String>
+<mx:String>Madame</mx:String>
+<mx:String>Monsieur</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_nom" label="Nom" width="100%" labelWidth="70" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nom" width="95%" text="{resttiersRead.lastResult.tiersRead.item.nom}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_prenom" label="Prénom" width="100%" labelWidth="70" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_prenom" width="95%" text="{resttiersRead.lastResult.tiersRead.item.prenom}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_societe" label="Société" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_societe" width="95%" text="{resttiersRead.lastResult.tiersRead.item.societe}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_service" label="Service" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_service" width="95%" text="{resttiersRead.lastResult.tiersRead.item.service}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_adresse" label="Adresse" width="100%" labelWidth="70" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_adresse" width="95%" text="{resttiersRead.lastResult.tiersRead.item.adresse}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_adresse2" label="Adresse suite" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_adresse2" width="95%" text="{resttiersRead.lastResult.tiersRead.item.adresse2}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_cp" label="CP" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_cp" width="100" text="{resttiersRead.lastResult.tiersRead.item.cp}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_ville" label="Ville" width="100%" labelWidth="70" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_ville" width="95%" text="{resttiersRead.lastResult.tiersRead.item.ville}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_compte_tiers" label="Compte tiers" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_compte_tiers" width="95%" text="{resttiersRead.lastResult.tiersRead.item.compte_tiers}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_tva_intra" label="N° TVA intracommunautaire" width="100%" labelWidth="70" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tva_intra" width="95%" text="{resttiersRead.lastResult.tiersRead.item.tva_intra}"   editable="false" />
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_tel" label="Téléphone" width="100%" labelWidth="70"  visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_tel" width="95%" text="{resttiersRead.lastResult.tiersRead.item.tel}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_fax" label="Fax" width="100%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_fax" width="95%" text="{resttiersRead.lastResult.tiersRead.item.fax}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_email" label="Email" width="100%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_email" width="95%" text="{resttiersRead.lastResult.tiersRead.item.email}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_siret" label="Siret" width="100%" labelWidth="70"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_siret" width="95%" text="{resttiersRead.lastResult.tiersRead.item.siret}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_pays" label="Pays" width="95%" labelWidth="70"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_pays_complement"  editable="false" width="100%" text="{resttiersRead.lastResult.tiersRead.item.pays}"   doubleClickEnabled="true" doubleClick="OpenConnexionpaysItem()"/>
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_pays" width="0" text="{resttiersRead.lastResult.tiersRead.item.pays_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionpays();"  enabled="false"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem id="formitem_nouveau" label="Nouveau" width="100%" labelWidth="70" visible="true"  required="false" >
+<mx:ComboBox id="combo_nouveau" width="95%"  text="{resttiersRead.lastResult.tiersRead.item.nouveau}"   enabled="false">
+<mx:dataProvider>
+<mx:String>Oui</mx:String>
+<mx:String>Non</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_tiers_Système" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_idtiers" label="idtiers" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idtiers" width="95%" text="{resttiersRead.lastResult.tiersRead.item.idtiers}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_date_creation" label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{resttiersRead.lastResult.tiersRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']" monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"  enabled="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_date_modification" label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{resttiersRead.lastResult.tiersRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']" monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true"  enabled="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_creation" label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{resttiersRead.lastResult.tiersRead.item.heure_creation}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_modification" label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{resttiersRead.lastResult.tiersRead.item.heure_modification}"   editable="false" />
+</mx:FormItem>
+<mx:FormItem id="formitem_annee" label="Année" width="100%" labelWidth="120" visible="true" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{resttiersRead.lastResult.tiersRead.item.annee}"  enabled="false">
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>2010</mx:String>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+<mx:String>2013</mx:String>
+<mx:String>2014</mx:String>
+<mx:String>2015</mx:String>
+<mx:String>2016</mx:String>
+<mx:String>2017</mx:String>
+<mx:String>2018</mx:String>
+<mx:String>2019</mx:String>
+<mx:String>2020</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_cle" label="Clé" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="95%" text="{resttiersRead.lastResult.tiersRead.item.cle}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_creation_par" label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="95%" text="{resttiersRead.lastResult.tiersRead.item.creation_par}"    editable="false"/>
+</mx:FormItem>
+<mx:FormItem id="formitem_modification_par" label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="95%" text="{resttiersRead.lastResult.tiersRead.item.modification_par}"    editable="false"/>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:HDividedBox>
+
+<mx:HBox width="100%" height="20" backgroundColor="#F2F2F2" paddingLeft="2" 
+	paddingTop="2" paddingRight="2" paddingBottom="2" textAlign="right"
+	backgroundAlpha="0.8">
+	<mx:Label id="label_etat" text="{datagrid_tiers.dataProvider.length} fiches trouvées" width="100%" textAlign="right"/>
+</mx:HBox>
+
+</mx:VBox>
+</mx:Canvas>
+

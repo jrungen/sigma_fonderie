@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="facture_fournisseurTable_script.as" />
+<mx:Script source="facture_fournisseur_script.as" />
+<mx:Script>
+	<![CDATA[
+		import mx.controls.Alert;
+		private function calcul_total():void{
+		var total:Number=0;
+		var total_acompte:Number=0;
+			for each (var row:Object in datagrid.dataProvider){
+		  		total += Number(row.montant_ht);
+		  		total_acompte += Number(row.total_acompte);
+		  	}
+		  	//Alert.show('test');
+		  	textTotalCA_HT.text = total.toFixed();
+		  	textTotalAcompte.text = total_acompte.toFixed();
+		}
+	]]>
+</mx:Script>
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restfacture_fournisseurList" url="facture_fournisseurList.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+<action>{search_combo_action.text}</action>
+<annee>{search_combo_annee.text}</annee>
+<comptable>{search_combo_comptable.text}</comptable>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restfacture_fournisseurRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restfacture_fournisseurUpdate" url="facture_fournisseurUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<date_facture>{date_date_facture.text}</date_facture>
+<action>{combo_action.text}</action>
+<cle>{text_cle.text}</cle>
+<fourniseur>{text_fourniseur.text}</fourniseur>
+<date_creation>{date_date_creation.text}</date_creation>
+<objet>{combo_objet.text}</objet>
+<creation_par>{text_creation_par.text}</creation_par>
+<projet>{connexion_projet.text}</projet>
+<item>{combo_item.text}</item>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<utilisateur>{connexion_utilisateur.text}</utilisateur>
+<date_modification>{date_date_modification.text}</date_modification>
+<type>{combo_type.text}</type>
+<taux_tva>{combo_taux_tva.text}</taux_tva>
+<cas>{text_cas.text}</cas>
+<modification_par>{text_modification_par.text}</modification_par>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<annee>{combo_annee.text}</annee>
+<societe>{text_societe.text}</societe>
+<pays>{connexion_pays.text}</pays>
+<montant_tva_19_6>{text_montant_tva_19_6.text}</montant_tva_19_6>
+<montant_ht_19_6>{text_montant_ht_19_6.text}</montant_ht_19_6>
+<taxe_pays>{text_taxe_pays.text}</taxe_pays>
+<taxe_pays_reduit>{text_taxe_pays_reduit.text}</taxe_pays_reduit>
+<montant_tva_55>{text_montant_tva_55.text}</montant_tva_55>
+<montant_ht_55>{text_montant_ht_55.text}</montant_ht_55>
+<montant_tva_locale>{text_montant_tva_locale.text}</montant_tva_locale>
+<montant_ht_locale>{text_montant_ht_locale.text}</montant_ht_locale>
+<montant_tva_locale_reduit>{text_montant_tva_locale_reduit.text}</montant_tva_locale_reduit>
+<montant_ht_locale_reduit>{text_montant_ht_locale_reduit.text}</montant_ht_locale_reduit>
+<numero>{text_numero.text}</numero>
+<pj>{fichier_text_pj.text}</pj>
+<montant_ht_0>{text_montant_ht_0.text}</montant_ht_0>
+<total_acompte>{text_total_acompte.text}</total_acompte>
+<frais_port_ht>{text_frais_port_ht.text}</frais_port_ht>
+<montant_restant_du>{text_montant_restant_du.text}</montant_restant_du>
+<commission_ht>{text_commission_ht.text}</commission_ht>
+<montant_ht>{text_montant_ht.text}</montant_ht>
+<note>{memo_note.text}</note>
+<tva_s_commission>{text_tva_s_commission.text}</tva_s_commission>
+<montant_tva>{text_montant_tva.text}</montant_tva>
+<tva_s_commission_55>{text_tva_s_commission_55.text}</tva_s_commission_55>
+<Remise>{text_Remise.text}</Remise>
+<frais_port>{text_frais_port.text}</frais_port>
+<tva_s_commission_locale>{text_tva_s_commission_locale.text}</tva_s_commission_locale>
+<ttc_commission>{text_ttc_commission.text}</ttc_commission>
+<montant_ttc>{text_montant_ttc.text}</montant_ttc>
+<facture_regle>{combo_facture_regle.text}</facture_regle>
+<total_regle>{text_total_regle.text}</total_regle>
+<montant_restant_du_facturation>{text_montant_restant_du_facturation.text}</montant_restant_du_facturation>
+<validation>{combo_validation.text}</validation>
+<note_comptable>{memo_note_comptable.text}</note_comptable>
+<pointe>{combo_pointe.text}</pointe>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restFactureFournisseur" showBusyCursor="true"/>
+
+
+<mx:HTTPService id="rest_connexion_projet" showBusyCursor="true" result="rest_connexion_projet_result();"/>
+<mx:HTTPService id="rest_connexion_utilisateur" showBusyCursor="true" result="rest_connexion_utilisateur_result();"/>
+<mx:HTTPService id="rest_connexion_pays" showBusyCursor="true" result="rest_connexion_pays_result();"/>
+
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%">
+	<mx:Label text="Rechercher" />
+	<mx:TextInput width="100%" id="textSearch"/>
+	<mx:Label text="dans" />
+	<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+		<mx:String>date_facture</mx:String>
+		<mx:String>projet</mx:String>
+		<mx:String>item</mx:String>
+		<mx:String>utilisateur</mx:String>
+		<mx:String>societe</mx:String>
+		<mx:String>numero</mx:String>
+		<mx:String>montant_ttc</mx:String>
+		<mx:String>facture_regle</mx:String>
+		<mx:String>total_regle</mx:String>
+		<mx:String>validation</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+	<mx:ComboBox id="search_combo_action" visible="false" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Acompte à régler</mx:String>
+<mx:String>Solde à régler</mx:String>
+
+</mx:dataProvider>
+	</mx:ComboBox>
+	<mx:Label text="Comptable" />
+	<mx:ComboBox id="search_combo_comptable" >
+	<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>Corinne</mx:String>
+	<mx:String>Benjamin</mx:String>
+	<mx:String>Kevin</mx:String>
+	
+	</mx:dataProvider>
+	</mx:ComboBox>
+	<mx:Label text="Année" />
+	<mx:ComboBox id="search_combo_annee" >
+<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>2017</mx:String>
+	<mx:String>2016</mx:String>
+	<mx:String>2015</mx:String>
+	<mx:String>2014</mx:String>
+	<mx:String>2013</mx:String>
+	<mx:String>2012</mx:String>
+	<mx:String>2011</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+
+	<mx:Button label="Rechercher" click="searchfacture_fournisseur()"/>
+	<mx:Label text="Filtre" />
+	<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+		<mx:String>Facture fournisseur a regler</mx:String>
+		<mx:String>Facture fournisseur reglee</mx:String>
+		<mx:String>Facture Avoir Fournisseur</mx:String>
+		<mx:String>2011</mx:String>
+		<mx:String>2012</mx:String>
+		<mx:String>Corinne</mx:String>
+		<mx:String>Benjamin</mx:String>
+		<mx:String>Kevin</mx:String>
+		<mx:String>Facture a comptabiliser</mx:String>
+		<mx:String>Facture en attente</mx:String>
+		<mx:String>Facture comptabilisee</mx:String>
+
+	</mx:dataProvider>			
+	</mx:ComboBox>
+	<mx:Button label="Afficher" click="searchfacture_fournisseur()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+	<mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Exporter vers Excel" />
+	</mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+
+<mx:HDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid" width="100%" height="100%" dataProvider="{restfacture_fournisseurList.lastResult.facture_fournisseurList.item}"
+	itemClick="send_selection(event)" change="send_selection(event)" horizontalScrollPolicy="auto" doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_facture_fournisseur">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+		<mx:AdvancedDataGridColumn headerText="N° dossier" dataField="projet"  visible="true" width="74" />
+		<mx:AdvancedDataGridColumn headerText="Chef de projet" dataField="utilisateur"  visible="true" width="130" />
+		<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"  visible="true" width="105" />
+		<mx:AdvancedDataGridColumn headerText="Type dépense" dataField="item"  visible="false" width="165" />
+		<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"  visible="true" width="80" />
+		<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"  visible="true" width="90" />
+		<mx:AdvancedDataGridColumn headerText="Statut" dataField="facture_regle"  visible="false" width="60" />
+		<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht"  visible="true" width="105" textAlign="right" />
+		<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"  visible="true" width="105" textAlign="right" />
+		<mx:AdvancedDataGridColumn headerText="Total acompte" dataField="total_acompte"  visible="true" textAlign="right" />
+		<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"  visible="true" width="105" textAlign="right" />
+		<mx:AdvancedDataGridColumn headerText="Pointé" dataField="pointe" visible="true" width="80"/>
+		<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur"  visible="false" />
+	</mx:columns>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="false" width="0%" height="0%">
+	<mx:TabNavigator id="tab_facture_fournisseur" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_facture_fournisseur_règlement" label="Règlement" width="100%" height="100%" mouseOver="cle_facture_fournisseur(); etat_FournisseurPE(); calcul_facture_fournisseur();" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Date" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_date_facture" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.date_facture}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Objet" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_objet" width="95%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.objet}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Prestation Tourisme d'affaires</mx:String>
+<mx:String>Prestation événementielles</mx:String>
+<mx:String>Prestation de services</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="N° dossier" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_projet"  editable="false" width="100%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.projet}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionprojet();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Type dépense" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_item" width="95%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.item}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>HEBERGEMENT</mx:String>
+<mx:String>AÉRIEN</mx:String>
+<mx:String>FERROVIAIRE</mx:String>
+<mx:String>LOCATION D ESPACES</mx:String>
+<mx:String>RESTAURATION</mx:String>
+<mx:String>TECHNIQUE</mx:String>
+<mx:String>EDITION</mx:String>
+<mx:String>ACCUEIL</mx:String>
+<mx:String>TRANSFERTS</mx:String>
+<mx:String>ANIMATION</mx:String>
+<mx:String>CADEAUX</mx:String>
+<mx:String>ASSURANCES</mx:String>
+<mx:String>FREE LANCE</mx:String>
+<mx:String>TOUR LEADER</mx:String>
+<mx:String>NOTES DE FRAIS</mx:String>
+<mx:String>DIVERS</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Type facture" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_type" width="95%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.type}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Factures fournisseurs</mx:String>
+<mx:String>Factures d'avoirs</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Chef de projet" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_utilisateur"  editable="false" width="100%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.utilisateur}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionutilisateur();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="PRESTATAIRE"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Prestataire" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_societe" width="95%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.societe}"  />
+</mx:FormItem>
+<mx:FormItem label="pays" width="95%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_pays"  editable="false" width="100%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.pays}"  valueCommit ="rest_connexion_pays_send();" />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionpays();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Taux TVA normal" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_taxe_pays" width="100" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.taxe_pays}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Taux TVA réduit" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_taxe_pays_reduit" width="100" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.taxe_pays_reduit}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text=""  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="N° facture" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_numero" width="95%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.numero}"  />
+</mx:FormItem>
+<mx:FormItem label="Total acompte" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_total_acompte" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.total_acompte}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant restant dû" width="100%" labelWidth="120" visible="false" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_montant_restant_du" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_restant_du}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Note" width="100%" height="100" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_note" wordWrap="true" editable="true" height="100" width="95%"  text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.note}"/>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Action à faire" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_action" width="150"  text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.action}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Acompte à régler</mx:String>
+<mx:String>Solde à régler</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddFactureFournisseur()" id="btn_Add_FactureFournisseur" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_FactureFournisseur" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_FactureFournisseur" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_FactureFournisseur" width="100%" height="100%" dataProvider="{restFactureFournisseur.lastResult.facture_fournisseur_ligneList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateFactureFournisseur()"><mx:columns><mx:AdvancedDataGridColumn headerText="Type de dépenses" dataField="type_depenses" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Désignation" dataField="designation"/>
+<mx:AdvancedDataGridColumn headerText="Date demande règlement" dataField="date_reglement" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="acompte_reglement"/>
+<mx:AdvancedDataGridColumn headerText="Statut" dataField="statut"/>
+<mx:AdvancedDataGridColumn headerText="Réglé le" dataField="date_paye"/>
+<mx:AdvancedDataGridColumn headerText="Montant TTC réglé" dataField="acompte_paye" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_fournisseur_ligne" dataField="idfacture_fournisseur_ligne" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_fournisseur_facture" label="Facture" width="100%" height="100%" mouseOver="calcul_facture_fournisseur(); etat_FournisseurPE()" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="Fournisseur" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_fourniseur" width="95%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.fourniseur}"  />
+</mx:FormItem>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="FACTURATION"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+
+<mx:FormItem label="Taux TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+	<mx:ComboBox id="combo_taux_tva" width="100" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.taux_tva}" >
+	<mx:dataProvider>
+		<mx:String>Ancien</mx:String>
+		<mx:String>Nouveau</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+
+<mx:FormItem label="Montant HT 19,6%" id="mht_196" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_19_6" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht_19_6}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant HT 5,5%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_55" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht_55}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant HT 7%" id="mht_7" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_7" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht_7}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+
+<mx:FormItem label="HT local normal" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_locale" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht_locale}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="HT local réduit" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_locale_reduit" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht_locale_reduit}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant non Assujeti TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht_0" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht_0}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Frais de port HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_frais_port_ht" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.frais_port_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Total HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_tva}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Remise" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_Remise" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.Remise}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Frais de port TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_frais_port" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.frais_port}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ttc" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Total règlement" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_total_regle" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.total_regle}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant restant du" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_restant_du_facturation" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_restant_du_facturation}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Observations comptable" width="100%" height="80" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_note_comptable" wordWrap="true" editable="true" height="80" width="95%"  text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.note_comptable}"/>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text=""  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Montant TVA 19,6%" id="mtva_196" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva_19_6" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_tva_19_6}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Montant TVA 5,5%" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva_55" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_tva_55}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+
+<mx:FormItem label="Montant TVA 7%" id="mtva_7" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva_7" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_tva_7}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+
+<mx:FormItem label="TVA local normal" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva_locale" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_tva_locale}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="TVA local réduit" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva_locale_reduit" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.montant_tva_locale_reduit}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Pièce jointe" width="95%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj"  width="150"  text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.pj}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj" click="initFile_pj()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj" label="Ouvrir" click="openNewWindow_pj(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:HBox width="100%"><mx:Label text="Commission déduite sur facture"  fontWeight="bold"  width="100%"  enabled="true" color="#000000" fontSize="10" textDecoration="underline" /></mx:HBox>
+<mx:FormItem label="HT Commission" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_commission_ht" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.commission_ht}" change = "calcul_commission();" restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="TVA 19.6" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tva_s_commission" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.tva_s_commission}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="TVA 5.5" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tva_s_commission_55" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.tva_s_commission_55}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="TVA Local" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_tva_s_commission_locale" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.tva_s_commission_locale}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="TTC Commission" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_ttc_commission" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.ttc_commission}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Statut" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_facture_regle" width="95%"  text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.facture_regle}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>A régler</mx:String>
+<mx:String>Réglé</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+<mx:FormItem label="Validation" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_validation" width="95%"  text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.validation}" >
+<mx:dataProvider>
+<mx:String>Non</mx:String>
+<mx:String>Oui</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+<mx:FormItem label="Pointé" width="100%" labelWidth="120"  visible="true" enabled="true" required="false">
+	<mx:ComboBox id="combo_pointe" width="150" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.pointe}" >
+	<mx:dataProvider>
+	<mx:String>Non</mx:String>
+	<mx:String>Oui</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_fournisseur_systeme" label="Systeme" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="cle" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="70%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="ID facture fournisseur" width="100%" labelWidth="150"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idfacture_fournisseur" width="70%" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.idfacture_fournisseur}"   />
+</mx:FormItem>
+<mx:FormItem label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="cas" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cas" width="150" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.cas}"   />
+</mx:FormItem>
+<mx:FormItem label="modification_par" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.modification_par}"   />
+</mx:FormItem>
+
+	<mx:TextInput id="text_total_acompte_ht" width="90" text="{restfacture_fournisseurRead.lastResult.facture_fournisseurRead.item.total_acompte_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:HDividedBox>
+
+<mx:HBox height="20" width="100%">
+		<mx:Label text="CA HT" />
+		<mx:TextInput width="100" id="textTotalCA_HT" text="{calcul_total()}"/>
+		<mx:Label text="Total acompte" />
+		<mx:TextInput width="100" id="textTotalAcompte"/>
+		<mx:Button label="Calculer" click="calcul_total()"/>
+		<mx:Label paddingLeft="150" />
+</mx:HBox>
+
+</mx:VBox>
+</mx:Canvas>
+

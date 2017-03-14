@@ -1,0 +1,405 @@
+<?xml version="1.0"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="850" height="440" 
+	title="Fiche fournisseur " creationComplete="load();initButton();"
+	xmlns:components="com.hillelcoren.components.*"
+	titleIcon="@Embed(source='assets/icones/fournisseur.png')" showCloseButton="true" close="fermer();"   initialize="createListenerfournisseur(event)" mouseOver="refresh_fournisseur();">
+	<mx:Script source="fournisseur_script.as" />
+	<mx:Script source="global.as" />
+	<mx:Script source="fournisseurItem_script.as" />
+
+	<!-- Fomat nombre -->
+	<mx:NumberFormatter thousandsSeparatorTo=" " thousandsSeparatorFrom=" " id="numberFormatter" precision="2" rounding="up"/>
+
+	<!-- Fomat date -->
+	<mx:DateFormatter formatString="DD/MM/YYYY" id="dateFormatter" />
+	
+	<!-- HTTP SERVICE, Pour lecture de la fiche -->
+   <mx:HTTPService id="restfournisseurRead" showBusyCursor="true" result="onLoad(event)"/>
+
+   <!-- HTTP SERVICE, Pour permission de la fiche -->
+   <mx:HTTPService id="restPermission" showBusyCursor="true" result="permissionResult(event)" />
+
+	<!-- HTTP SERVICE, Pour suppression de la fiche -->
+   <mx:HTTPService id="restDelete" showBusyCursor="true" />
+
+   <!-- HTTP SERVICE, Pour les connexions -->
+   <mx:HTTPService id="restConnexion" method="POST" />
+   
+	<!-- HTTP SERVICE, sauvegarder les données create de la fiche -->
+   <mx:HTTPService id="restfournisseurCreate" url="fournisseurCreate.php" 
+   	useProxy="false" method="POST" showBusyCursor="true" result="onCreate(event)">
+   <mx:request xmlns="">
+	<cle>{text_cle.text}</cle>
+	<nom>{text_nom.text}</nom>
+	<tel>{text_tel.text}</tel>
+	<date_creation>{date_date_creation.text}</date_creation>
+	<creation_par>{text_creation_par.text}</creation_par>
+	<fax>{text_fax.text}</fax>
+	<adresse>{text_adresse.text}</adresse>
+	<heure_creation>{text_heure_creation.text}</heure_creation>
+	<email>{text_email.text}</email>
+	<adressesuite>{text_adressesuite.text}</adressesuite>
+	<modification_par>{text_modification_par.text}</modification_par>
+	<date_modification>{date_date_modification.text}</date_modification>
+	<cp>{text_cp.text}</cp>
+	<siret>{text_siret.text}</siret>
+	<heure_modification>{text_heure_modification.text}</heure_modification>
+	<ville>{text_ville.text}</ville>
+	<pays>{connexion_pays.text}</pays>
+	<compte_tiers>{text_compte_tiers.text}</compte_tiers>
+	<annee>{combo_annee.text}</annee>
+	<tva_intra>{text_tva_intra.text}</tva_intra>
+	<nouveau>{combo_nouveau.text}</nouveau>
+	<date_demande_attestation>{date_date_demande_attestation.text}</date_demande_attestation>
+	<date_relance1>{date_date_relance1.text}</date_relance1>
+	<date_relance2>{date_date_relance2.text}</date_relance2>
+	<date_reception>{date_date_reception.text}</date_reception>
+	<date_document>{date_date_document.text}</date_document>
+	<date_renouvellement>{date_date_renouvellement.text}</date_renouvellement>
+   </mx:request>
+   </mx:HTTPService>
+   
+   <!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+   <mx:HTTPService id="restfournisseurUpdate" url="fournisseurUpdate.php" 
+   	useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+   <mx:request xmlns="">
+	<cle>{text_cle.text}</cle>
+	<nom>{text_nom.text}</nom>
+	<tel>{text_tel.text}</tel>
+	<date_creation>{date_date_creation.text}</date_creation>
+	<creation_par>{text_creation_par.text}</creation_par>
+	<fax>{text_fax.text}</fax>
+	<adresse>{text_adresse.text}</adresse>
+	<heure_creation>{text_heure_creation.text}</heure_creation>
+	<email>{text_email.text}</email>
+	<adressesuite>{text_adressesuite.text}</adressesuite>
+	<modification_par>{text_modification_par.text}</modification_par>
+	<date_modification>{date_date_modification.text}</date_modification>
+	<cp>{text_cp.text}</cp>
+	<siret>{text_siret.text}</siret>
+	<heure_modification>{text_heure_modification.text}</heure_modification>
+	<ville>{text_ville.text}</ville>
+	<pays>{connexion_pays.text}</pays>
+	<compte_tiers>{text_compte_tiers.text}</compte_tiers>
+	<annee>{combo_annee.text}</annee>
+	<tva_intra>{text_tva_intra.text}</tva_intra>
+	<nouveau>{combo_nouveau.text}</nouveau>
+	<date_demande_attestation>{date_date_demande_attestation.text}</date_demande_attestation>
+	<date_relance1>{date_date_relance1.text}</date_relance1>
+	<date_relance2>{date_date_relance2.text}</date_relance2>
+	<date_reception>{date_date_reception.text}</date_reception>
+	<date_document>{date_date_document.text}</date_document>
+	<date_renouvellement>{date_date_renouvellement.text}</date_renouvellement>
+   </mx:request>
+   </mx:HTTPService>
+ 
+<!-- HTTP VUES -->
+	<mx:HTTPService id="restFournisseurAction" showBusyCursor="true"/>
+	<mx:HTTPService id="restFournisseurFactureFournisseur" showBusyCursor="true"/>
+	<mx:HTTPService id="restFournisseurFournisseur_attestation" showBusyCursor="true"/>
+ 
+<!-- HTTP SERVICE CONNEXION-->
+	<mx:HTTPService id="rest_connexion_pays" showBusyCursor="true" result="rest_connexion_pays_result();"/>
+
+<!-- HTTP SERVICE LOV-->
+		
+	
+<!-- VALIDATOR -->
+<mx:StringValidator id="valid_cp" source="{text_cp}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_ville" source="{text_ville}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_nom" source="{text_nom}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_pays" source="{connexion_pays}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_adresse" source="{text_adresse}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+<mx:StringValidator id="valid_tel" source="{text_tel}" property="text" trigger="{btn_enregistrer}" triggerEvent="click" requiredFieldError="Ce champ est obligatoire." />
+
+		<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"  width="100%" height="100%" >
+			<mx:VBox height="100%" width="100%" paddingTop="10">
+			<mx:TabNavigator id="tab_fournisseur" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+				<mx:Canvas id="tab_fournisseur_principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+	<mx:FormItem id="formitem_nom" label="Raison social" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_nom" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.nom}"  />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_adresse" label="Adresse" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_adresse" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.adresse}"  />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_adressesuite" label="Adresse 2" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_adressesuite" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.adressesuite}"  />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_cp" label="CP" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_cp" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.cp}"  />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_ville" label="Ville" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_ville" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.ville}"  />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_compte_tiers" label="Compte tiers" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_compte_tiers" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.compte_tiers}"  />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_tva_intra" label="N° TVA intracommunautaire" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+	<mx:TextInput id="text_tva_intra" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.tva_intra}"  />
+	</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+	<mx:FormItem id="formitem_tel" label="Téléphone" width="100%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_tel" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.tel}"   />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_fax" label="Fax" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_fax" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.fax}"   />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_email" label="Email" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_email" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.email}"   />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_siret" label="Siret" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_siret" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.siret}"   />
+	</mx:FormItem>
+	<mx:FormItem id="formitem_pays" label="Pays" width="95%" labelWidth="120"  visible="true" enabled="true" required="true"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_pays_complement"  editable="false" width="100%" text="{restfournisseurRead.lastResult.fournisseurRead.item.pays}"   doubleClickEnabled="true" doubleClick="OpenConnexionpaysItem()" />
+
+</mx:VBox><mx:VBox width="0" visible="false"><mx:TextInput id="connexion_pays" width="0" text="{restfournisseurRead.lastResult.fournisseurRead.item.pays_cle}"/></mx:VBox>
+<mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionpays();"/></mx:VBox></mx:HBox>
+	</mx:FormItem>
+	<mx:FormItem label="Nouveau" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+	<mx:ComboBox id="combo_nouveau" width="200"  text="{restfournisseurRead.lastResult.fournisseurRead.item.nouveau}" >
+	<mx:dataProvider>
+	<mx:String>Oui</mx:String>
+	<mx:String>Non</mx:String>
+	</mx:dataProvider>
+	</mx:ComboBox>
+	</mx:FormItem>
+
+	<mx:HBox width="100%" height="22">
+	</mx:HBox>
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+
+<mx:Canvas id="tab_fournisseur_facture_fournisseur" label="Facture Fournisseur" width="100%" height="100%">
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	<mx:HBox width="100%" height="100%">
+	<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+	<mx:Label text="Factures fournisseurs"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" />
+	<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+	<mx:Button label="" click="AddFournisseurFactureFournisseur()" id="btn_Add_FournisseurFactureFournisseur" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+	</mx:Button>
+	<mx:Button label=""  id="btn_Delete_FournisseurFactureFournisseur" click="Delete_FournisseurFactureFournisseur(datagrid_FournisseurFactureFournisseur.selectedItem.idfacture_fournisseur)" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+	</mx:Button>
+	<mx:Button label="" click="send_selection()"  id="btn_Refresh_FournisseurFactureFournisseur" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+	</mx:Button>
+	<mx:ComboBox id="text_search_FournisseurFacture" width="100" >
+		<mx:dataProvider>
+		<mx:String></mx:String>
+		<mx:String>2015</mx:String>
+		<mx:String>2014</mx:String>
+		<mx:String>2013</mx:String>
+		<mx:String>2012</mx:String>
+		<mx:String>2011</mx:String>
+		<mx:String>2010</mx:String>
+		<mx:String>2009</mx:String>
+		</mx:dataProvider>
+	</mx:ComboBox>
+	<mx:Button label="Filtrer" click="send_selection()" id="btn_Filtrer_FournisseurFacture" borderColor="#FFFFFF">
+	</mx:Button>
+	</mx:HBox>
+	<mx:AdvancedDataGrid id="datagrid_FournisseurFactureFournisseur" width="100%" height="100%" dataProvider="{restFournisseurFactureFournisseur.lastResult.facture_fournisseurList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateFournisseurFactureFournisseur()" styleFunction="style_datagrid_FournisseurFactureFournisseur"><mx:columns>
+	<mx:AdvancedDataGridColumn headerText="Date" dataField="date_facture"/>
+	<mx:AdvancedDataGridColumn headerText="Type" dataField="type"/>
+	<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"/>
+	<mx:AdvancedDataGridColumn headerText="Prestataire" dataField="societe"/>
+	<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht"/>
+	<mx:AdvancedDataGridColumn headerText="Montant TTC" dataField="montant_ttc"/>
+	<mx:AdvancedDataGridColumn headerText="Total règlement" dataField="total_regle"/>
+	<mx:AdvancedDataGridColumn headerText="Montant restant dû" dataField="montant_restant_du"/>
+	<mx:AdvancedDataGridColumn headerText="ID facture fournisseur" dataField="idfacture_fournisseur" visible="false"/>
+	<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+	
+	</mx:VBox></mx:HBox>
+	</mx:Form>
+</mx:Canvas>
+<mx:Canvas id="tab_fournisseur_fournisseur_attestation" label="Attestation Founisseur" width="100%" height="100%">
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	<mx:HBox width="100%" height="100%">
+	<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+	<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Attestation fournisseur"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+	<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+	<mx:Button label="" click="AddFournisseurFournisseur_attestation()" id="btn_Add_FournisseurFournisseur_attestation" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+	</mx:Button>
+	<mx:Button label="" click="Delete_FournisseurFournisseur_attestation(datagrid_FournisseurFournisseur_attestation.selectedItem.idfournisseur_attestation)" id="btn_Delete_FournisseurFournisseur_attestation" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+	</mx:Button>
+	<mx:Button label="" click="send_selection()"  id="btn_Refresh_FournisseurFournisseur_attestation" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+	</mx:Button>
+	</mx:HBox>
+	
+	<mx:AdvancedDataGrid id="datagrid_FournisseurFournisseur_attestation" width="100%" height="100%" dataProvider="{restFournisseurFournisseur_attestation.lastResult.fournisseur_attestationList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateFournisseurFournisseur_attestation()" styleFunction="style_datagrid_FournisseurFournisseur_attestation">
+	<mx:columns><mx:AdvancedDataGridColumn headerText="idfournisseur_attestation" dataField="idfournisseur_attestation" visible="false"/>	
+	<mx:AdvancedDataGridColumn headerText="Date attestation" dataField="date_attestation"  visible="true" />
+	<mx:AdvancedDataGridColumn headerText="Note" dataField="note"  visible="true" width="250" />
+	<mx:AdvancedDataGridColumn headerText="KBIS" dataField="pj_kbis"  visible="true" width="160" />
+	<mx:AdvancedDataGridColumn headerText="URSSAF RSI" dataField="pj_urssaf_rsi" visible="true" width="160" />
+	<mx:AdvancedDataGridColumn headerText="Autre" dataField="pj_autre"  visible="true" width="160" />
+	<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+</mx:columns>
+</mx:AdvancedDataGrid>
+<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="Demande attestation "  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+		<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d" height="0">
+		
+		</mx:HBox>	
+	</mx:VBox>
+</mx:HBox>
+<mx:HBox width="100%">
+	<mx:VBox width="50%">
+	
+		<mx:FormItem id="formitem_date_demande_attestation" label="Date demande attestation" width="100%" labelWidth="200" visible="true" required="false" >
+		<mx:DateField id="date_date_demande_attestation" enabled="false" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_demande_attestation}"
+		formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+		</mx:FormItem>
+		
+		<mx:FormItem id="formitem_date_relance1" label="Date 1ère relance" width="100%" labelWidth="200" visible="true" required="false" >
+		<mx:DateField id="date_date_relance1" width="90" enabled="false" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_relance1}"
+		formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+		</mx:FormItem>
+	
+		<mx:FormItem id="formitem_date_relance2" label="Date 2ème relance" width="100%" labelWidth="200" visible="true" required="false" >
+		<mx:DateField id="date_date_relance2" width="90" enabled="false" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_relance2}"
+		formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+		</mx:FormItem>
+	</mx:VBox>
+	
+	<mx:VBox width="50%">
+		<mx:FormItem id="formitem_date_reception" label="Date de réception" width="100%" labelWidth="200" visible="true" required="false" >
+		<mx:DateField id="date_date_reception" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_reception}"
+		formatString="DD/MM/YYYY" firstDayOfWeek="0" enabled="false" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+		</mx:FormItem>
+		<mx:FormItem id="formitem_date_document" label="Date de l'attestation" width="100%" labelWidth="200" visible="true" required="false" >
+		<mx:DateField id="date_date_document" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_document}"
+		formatString="DD/MM/YYYY" firstDayOfWeek="0" enabled="false" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+		</mx:FormItem>
+		<mx:FormItem id="formitem_date_renouvellement" label="Date renouvellement" width="100%" labelWidth="200" visible="true" required="false" >
+		<mx:DateField id="date_date_renouvellement" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_renouvellement}"
+		formatString="DD/MM/YYYY" firstDayOfWeek="0" enabled="false" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+		</mx:FormItem>
+	</mx:VBox>
+</mx:HBox>
+	
+	</mx:Form>
+</mx:Canvas>
+
+<mx:Canvas id="tab_fournisseur_action" label="Action" width="100%" height="100%">
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+	<mx:HBox width="100%" height="100%">
+	<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+	<mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d">
+	<mx:Label text="Actions"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" />
+	</mx:HBox>
+	<mx:HBox width="100%" height="20">
+	</mx:HBox>
+	<mx:HBox width="100%" paddingTop="0" paddingRight="10">
+	<mx:Button label="" click="AddFournisseurAction()" id="btn_Add_FournisseurAction" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+	</mx:Button>
+	<mx:Button label="" click="Delete_FournisseurAction(datagrid_FournisseurAction.selectedItem.idaction)" id="btn_Delete_FournisseurAction" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+	</mx:Button>
+	<mx:Button label="" click="send_selection()"  id="btn_Refresh_FournisseurAction" borderColor="#FFFFFF">
+	<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+	</mx:Button>
+	</mx:HBox>
+	
+	<mx:AdvancedDataGrid id="datagrid_FournisseurAction" width="100%" height="100%" dataProvider="{restFournisseurAction.lastResult.actionList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateFournisseurAction()" styleFunction="style_datagrid_FournisseurAction">
+		<mx:columns><mx:AdvancedDataGridColumn headerText="iddepenses_annexes" dataField="iddepenses_annexes" visible="false"/>
+		<mx:AdvancedDataGridColumn headerText="Date début" dataField="date_debut"  visible="true" />
+		<mx:AdvancedDataGridColumn headerText="Date fin" dataField="date_fin"  visible="true" />
+		<mx:AdvancedDataGridColumn headerText="Société" dataField="societe"  visible="true" />
+		<mx:AdvancedDataGridColumn headerText="Nom" dataField="nom"  visible="true" width="250" />
+		<mx:AdvancedDataGridColumn headerText="Type" dataField="type"  visible="true" />
+		<mx:AdvancedDataGridColumn headerText="Statut" dataField="statut"  visible="true" />
+		<mx:AdvancedDataGridColumn headerText="Utilisateur" dataField="utilisateur"  visible="true" />
+		<mx:AdvancedDataGridColumn headerText="Durée" dataField="duree"  visible="true" textAlign="right" formatter="{numberFormatter}" />
+		<mx:AdvancedDataGridColumn headerText="idaction" dataField="idaction"  visible="false" />
+		<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+	</mx:columns>
+	</mx:AdvancedDataGrid>
+	
+	</mx:VBox></mx:HBox>
+	</mx:Form>
+</mx:Canvas>
+
+<mx:Canvas id="tab_fournisseur_Système" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_cle" label="cle" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_date_creation" label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_creation" label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_date_modification" label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" yearNavigationEnabled="true" />
+</mx:FormItem>
+<mx:FormItem id="formitem_heure_modification" label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem id="formitem_annee" label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restfournisseurRead.lastResult.fournisseurRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem id="formitem_idfournisseur" label="idfournisseur" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idfournisseur" width="200" text="{restfournisseurRead.lastResult.fournisseurRead.item.idfournisseur}"   />
+</mx:FormItem>
+<mx:FormItem id="formitem_creation_par" label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restfournisseurRead.lastResult.fournisseurRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem id="formitem_modification_par" label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restfournisseurRead.lastResult.fournisseurRead.item.modification_par}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+			</mx:TabNavigator>
+			</mx:VBox>
+		</mx:Canvas>
+		<mx:HBox id="hbox_fournisseur_btn" width="100%" horizontalAlign="right">
+			<mx:Button label="Imprimer" id="btn_imprimer" click="imprimer()">
+				<mx:icon>@Embed(source='assets/icones/imprimer.png')</mx:icon>
+			</mx:Button>
+
+			<mx:Button label="Fermer" id="btn_fermer" click="fermer()">
+				<mx:icon>@Embed(source='assets/icones/fermer.png')</mx:icon>
+			</mx:Button>
+
+			<mx:Button label="Enregistrer" id="btn_appliquer" click="appliquer()">
+				<mx:icon>@Embed(source='assets/icones/appliquer.png')</mx:icon>
+			</mx:Button>
+
+			<mx:Button id="btn_enregistrer" click="enregistrer()" label="Enregistrer et fermer">
+				<mx:icon>@Embed(source='assets/icones/enregistrer.png')</mx:icon>
+			</mx:Button>
+		</mx:HBox>
+
+</mx:TitleWindow>
+
+
+

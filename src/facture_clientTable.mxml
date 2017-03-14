@@ -1,0 +1,697 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" creationComplete="load();initButton();" xmlns:MyComp="*" width="100%" height="100%"
+	paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0"
+	xmlns:components="com.hillelcoren.components.*">
+<mx:Script source="global.as" />	
+<mx:Script source="facture_clientTable_script.as" />
+<mx:Script source="facture_client_script.as" />
+<mx:Script>
+	<![CDATA[
+		import mx.events.ListEvent;
+		import mx.collections.ArrayCollection;
+		import mx.controls.Alert;
+		private function calcul_total():void{
+		var total:Number=0;
+		var total_acompte:Number=0;
+			for each (var row:Object in datagrid.dataProvider){
+		  		total += Number(row.montant_ht);
+		  		total_acompte += Number(row.acompte_total);
+		  	}
+		  	//Alert.show('test');
+		  	textTotalCA_TTC.text = total.toFixed();
+		  	textTotalAcompte.text = total_acompte.toFixed();
+		}
+	
+    [Bindable]
+
+	public var listeItemSelected : ArrayCollection= new ArrayCollection;
+	public var vSelection:String;
+  	// impression facture client et autre TA
+	public function cbAllHandler_TA():void
+	{
+		listeItemSelected.removeAll();
+	
+		for each (var item:Object in datagrid.selectedItems){
+		      listeItemSelected.addItem(item.idfacture_client);
+		}
+	
+		navigateToURL( new URLRequest( 'modele/html2pdf.php?modele=facture_client&cle='+String(listeItemSelected)), "_blank" );
+	}
+	// impression facture client et autre  PE-PS
+	public function cbAllHandler_PEPS():void
+	{
+		listeItemSelected.removeAll();
+	
+		for each (var item:Object in datagrid.selectedItems){
+		      listeItemSelected.addItem(item.idfacture_client);
+		}
+	
+		navigateToURL( new URLRequest( 'modele/html2pdf.php?modele=facture_client_pe&cle='+String(listeItemSelected)), "_blank" );
+	}
+	// impression facture Avoir TA
+	public function cbAllHandler_AVOIR_TA():void
+	{
+		listeItemSelected.removeAll();
+	
+		for each (var item:Object in datagrid.selectedItems){
+		      listeItemSelected.addItem(item.idfacture_client);
+		}
+	
+		navigateToURL( new URLRequest( 'modele/html2pdf.php?modele=facture_avoir&cle='+String(listeItemSelected)), "_blank" );
+	}
+	// impression facture Avoir PE-PS
+	public function cbAllHandler_AVOIR_PEPS():void
+	{
+		listeItemSelected.removeAll();
+	
+		for each (var item:Object in datagrid.selectedItems){
+		      listeItemSelected.addItem(item.idfacture_client);
+		}
+	
+		navigateToURL( new URLRequest( 'modele/html2pdf.php?modele=facture_avoir_pe&cle='+String(listeItemSelected)), "_blank" );
+	}
+	
+	// impression facture Accompagnant
+	public function cbAllHandler_ACC():void
+	{
+		listeItemSelected.removeAll();
+	
+		for each (var item:Object in datagrid.selectedItems){
+		      listeItemSelected.addItem(item.idfacture_client);
+		}
+	
+		navigateToURL( new URLRequest( 'modele/html2pdf.php?modele=facture_accompagnant&cle='+String(listeItemSelected)), "_blank" );
+	}
+	// impression facture Avoir Accompagnant
+	public function cbAllHandler_AVOIR_ACC():void
+	{
+		listeItemSelected.removeAll();
+	
+		for each (var item:Object in datagrid.selectedItems){
+		      listeItemSelected.addItem(item.idfacture_client);
+		}
+	
+		navigateToURL( new URLRequest( 'modele/html2pdf.php?modele=facture_accompagnant_avoir&cle='+String(listeItemSelected)), "_blank" );
+	}
+
+	]]>
+</mx:Script>
+<!-- HTTP SERVICE, Pour les connexions -->
+<mx:HTTPService id="restConnexion" method="POST" />
+
+<!-- HTTP SERVICE pour le datagrid -->
+<mx:HTTPService id="restfacture_clientList" url="facture_clientList.php" 
+useProxy="false" method="POST" showBusyCursor="true">
+<mx:request xmlns="">
+<search>{textSearch.text}</search>
+<field>{combo_recherche.text}</field>
+<view>{combo_filtre.text}</view>
+<reglee>{search_combo_reglee.text}</reglee>
+<annee>{search_combo_annee.text}</annee>
+<comptable>{search_combo_comptable.text}</comptable>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restfacture_clientRead" showBusyCursor="true" result="onLoad(event)" />
+
+<!-- HTTP SERVICE, sauvegarder les données update de la fiche -->
+<mx:HTTPService id="restfacture_clientUpdate" url="facture_clientUpdate.php" 
+useProxy="false" method="POST" showBusyCursor="true" result="onUpdate(event)">
+<mx:request xmlns="">
+<cle>{text_cle.text}</cle>
+<date_creation>{date_date_creation.text}</date_creation>
+<montant_ht>{text_montant_ht.text}</montant_ht>
+<clt_reference>{text_clt_reference.text}</clt_reference>
+<creation_par>{text_creation_par.text}</creation_par>
+<objet>{combo_objet.text}</objet>
+<acc_ref>{text_acc_ref.text}</acc_ref>
+<societe>{connexion_societe.text}</societe>
+<acompte1>{text_acompte1.text}</acompte1>
+<montant_tva>{text_montant_tva.text}</montant_tva>
+<heure_creation>{text_heure_creation.text}</heure_creation>
+<type>{combo_type.text}</type>
+<acc_civilite>{combo_acc_civilite.text}</acc_civilite>
+<acc_nb_personne>{text_acc_nb_personne.text}</acc_nb_personne>
+<projet>{connexion_projet.text}</projet>
+<date1>{date_date1.text}</date1>
+<date_modification>{date_date_modification.text}</date_modification>
+<acc_date_depart>{date_acc_date_depart.text}</acc_date_depart>
+<montant_ttc>{text_montant_ttc.text}</montant_ttc>
+<acc_nom>{text_acc_nom.text}</acc_nom>
+<modification_par>{text_modification_par.text}</modification_par>
+<contact>{text_contact.text}</contact>
+<acc_date_retour>{date_acc_date_retour.text}</acc_date_retour>
+<pj1>{fichier_text_pj1.text}</pj1>
+<acc_facturation_adresse1>{text_acc_facturation_adresse1.text}</acc_facturation_adresse1>
+<cas>{text_cas.text}</cas>
+<heure_modification>{text_heure_modification.text}</heure_modification>
+<facturation_adresse1>{text_facturation_adresse1.text}</facturation_adresse1>
+<operation>{combo_operation.text}</operation>
+<utilisateur>{connexion_utilisateur.text}</utilisateur>
+<facturation_adresse2>{text_facturation_adresse2.text}</facturation_adresse2>
+<note>{memo_note.text}</note>
+<annee>{combo_annee.text}</annee>
+<facturation_cp>{text_facturation_cp.text}</facturation_cp>
+<acc_facturation_cp>{text_acc_facturation_cp.text}</acc_facturation_cp>
+<acc_note>{memo_acc_note.text}</acc_note>
+<date_facture>{date_date_facture.text}</date_facture>
+<acompte2>{text_acompte2.text}</acompte2>
+<facturation_ville>{text_facturation_ville.text}</facturation_ville>
+<acc_facturation_ville>{text_acc_facturation_ville.text}</acc_facturation_ville>
+<date2>{date_date2.text}</date2>
+<numero>{text_numero.text}</numero>
+<pays>{text_pays.text}</pays>
+<acc_hop>{text_acc_hop.text}</acc_hop>
+<pj2>{fichier_text_pj2.text}</pj2>
+<libelle>{text_libelle.text}</libelle>
+<acc_service_hop>{text_acc_service_hop.text}</acc_service_hop>
+<acompte3>{text_acompte3.text}</acompte3>
+<date3>{date_date3.text}</date3>
+<pj3>{fichier_text_pj3.text}</pj3>
+<acompte_total>{text_acompte_total.text}</acompte_total>
+<montant_restant>{text_montant_restant.text}</montant_restant>
+<reglee>{combo_reglee.text}</reglee>
+<statut>{combo_statut.text}</statut>
+<delai_paiement>{text_delai_paiement.text}</delai_paiement>
+<pj>{fichier_text_pj.text}</pj>
+<montant_total_paiement_ttc>{text_montant_total_paiement_ttc.text}</montant_total_paiement_ttc>
+<tva>{combo_tva.text}</tva>
+<acompte_regle>{text_acompte_regle.text}</acompte_regle>
+<pourcentage1>{text_pourcentage1.text}</pourcentage1>
+<acompte_clt_1>{text_acompte_clt_1.text}</acompte_clt_1>
+<acompte_date1>{date_acompte_date1.text}</acompte_date1>
+<pourcentage2>{text_pourcentage2.text}</pourcentage2>
+<acompte_clt_2>{text_acompte_clt_2.text}</acompte_clt_2>
+<acompte_date2>{date_acompte_date2.text}</acompte_date2>
+
+</mx:request>
+</mx:HTTPService>
+
+<mx:HTTPService id="restFactureLigneTA" showBusyCursor="true"/>
+<mx:HTTPService id="restFactureLigne" showBusyCursor="true"/>
+
+
+<mx:HTTPService id="rest_connexion_societe" showBusyCursor="true" result="rest_connexion_societe_result();"/>
+<mx:HTTPService id="rest_connexion_projet" showBusyCursor="true" result="rest_connexion_projet_result();"/>
+<mx:HTTPService id="rest_connexion_utilisateur" showBusyCursor="true" result="rest_connexion_utilisateur_result();"/>
+
+
+<mx:VBox height="100%" width="100%">
+
+<mx:ApplicationControlBar width="100%">
+<mx:Label text="Rechercher" />
+<mx:TextInput width="100%" id="textSearch"/>
+<mx:Label text="dans" />
+<mx:ComboBox id="combo_recherche">
+	<mx:dataProvider>
+		<mx:String>Tous</mx:String>
+			<mx:String>societe</mx:String>
+<mx:String>montant_ttc</mx:String>
+<mx:String>projet</mx:String>
+<mx:String>operation</mx:String>
+<mx:String>utilisateur</mx:String>
+<mx:String>numero</mx:String>
+<mx:String>montant_restant</mx:String>
+
+	</mx:dataProvider>
+</mx:ComboBox>
+<mx:Label text="Facture" /><mx:ComboBox id="search_combo_reglee" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Non payée</mx:String>
+<mx:String>Payée</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+	<mx:Label text="Comptable" />
+	<mx:ComboBox id="search_combo_comptable" >
+	<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>Corinne</mx:String>
+	<mx:String>Benjamin</mx:String>
+	<mx:String>Kevin</mx:String>
+	
+	</mx:dataProvider>
+	</mx:ComboBox>
+<mx:Label text="Année" /><mx:ComboBox id="search_combo_annee" >
+<mx:dataProvider>
+	<mx:String></mx:String>
+	<mx:String>2017</mx:String>
+	<mx:String>2016</mx:String>
+	<mx:String>2015</mx:String>
+	<mx:String>2014</mx:String>
+	<mx:String>2013</mx:String>
+	<mx:String>2012</mx:String>
+	<mx:String>2011</mx:String>
+</mx:dataProvider>
+</mx:ComboBox>
+
+<mx:Button label="Rechercher" click="searchfacture_client()"/>
+<mx:Label text="Filtre" />
+<mx:ComboBox id="combo_filtre" width="100%">
+	<mx:dataProvider>
+		<mx:String>Par défaut</mx:String>
+			<mx:String>Facture Client et Autre TA</mx:String>
+			<mx:String>Facture Client et Autre PE-PS</mx:String>
+			<mx:String>Facture Avoir TA</mx:String>
+			<mx:String>Facture Avoir PE-PS</mx:String>
+			<mx:String>Facture Avoir Client</mx:String>
+			<mx:String>Facture Accompagnant</mx:String>
+			<mx:String>Facture Avoir Accompagnant</mx:String>
+			<mx:String>Facture autre</mx:String>
+			<mx:String>Corinne</mx:String>
+			<mx:String>Benjamin</mx:String>
+			<mx:String>Kevin</mx:String>
+			<mx:String>Facture a comptabiliser</mx:String>
+			<mx:String>Facture en attente</mx:String>
+			<mx:String>Facture comptabilisee</mx:String>
+			<mx:String>Paiement a comptabiliser</mx:String>
+			<mx:String>Paiement en attente</mx:String>
+			<mx:String>Paiement comptabilisee</mx:String>
+	</mx:dataProvider>			
+</mx:ComboBox>
+<mx:Button label="Afficher" click="searchfacture_client()"/>
+</mx:ApplicationControlBar>
+<mx:HBox height="3%" width="100%">
+<mx:MenuBar width="100%" id="myMenuBar" labelField="@label" click="menu(event)"  themeColor="#000">
+ 	<mx:XMLList>
+	<menuitem label="Nouveau" />
+	<menuitem label="Exporter vers Excel" />
+	<menuitem label="Imp F.Client et F.Autre TA" />
+	<menuitem label="Imp F.Client et F.Autre PE-PS" />
+	<menuitem label="Imp F.Avoir TA" />
+	<menuitem label="Imp F.Avoir PE-PS" />
+	<menuitem label="Imp F.Accompagnant" />
+	<menuitem label="Imp F.Avoir Accompagnant" />
+	</mx:XMLList>
+</mx:MenuBar>
+</mx:HBox>
+
+<mx:VDividedBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%">
+<mx:AdvancedDataGrid id="datagrid" width="100%" height="100%" dataProvider="{restfacture_clientList.lastResult.facture_clientList.item}"
+	itemClick="send_selection(event)" allowMultipleSelection="true" change="send_selection(event)" horizontalScrollPolicy="auto" doubleClickEnabled="true" itemDoubleClick="openItem()" styleFunction="style_datagrid_facture_client">
+	<mx:columns>
+		<mx:AdvancedDataGridColumn headerText="cle" dataField="cle"  visible="false" />
+		<mx:AdvancedDataGridColumn headerText="idfacture_client" dataField="idfacture_client"  visible="false" />
+		<mx:AdvancedDataGridColumn headerText="N° dossier" dataField="projet"  visible="true" width="130" />
+		<mx:AdvancedDataGridColumn headerText="N° facture" dataField="numero"  visible="true" width="82" />
+		<mx:AdvancedDataGridColumn headerText="Client" dataField="societe"  visible="true" width="220" />
+		<mx:AdvancedDataGridColumn headerText="Date facture" dataField="date_facture"  visible="true" width="85" />
+		<mx:AdvancedDataGridColumn headerText="Chef de projet" dataField="utilisateur"  visible="true" width="130" />
+		<mx:AdvancedDataGridColumn headerText="Opération" dataField="operation"  visible="true" width="140" />
+		<mx:AdvancedDataGridColumn headerText="Montant HT" dataField="montant_ht"  visible="true" width="105" textAlign="right" />
+		<mx:AdvancedDataGridColumn headerText="Total paiement" dataField="acompte_total"  visible="true" width="105" textAlign="right" />
+		<mx:AdvancedDataGridColumn headerText="Restant dû" dataField="montant_restant"  visible="true" width="105" textAlign="right" />
+
+	</mx:columns>
+</mx:AdvancedDataGrid>					
+</mx:VBox>
+<mx:VBox visible="false" width="0%" height="0%">
+	<mx:TabNavigator id="tab_facture_client" width="100%" height="100%" paddingLeft="10" paddingBottom="10" paddingRight="10" creationPolicy="all">
+		<mx:Canvas id="tab_facture_client_principal" label="Principal" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="ENTETE FACTURE"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Objet" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_objet" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.objet}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Prestation événementielles</mx:String>
+<mx:String>Prestation tourisme d'affaires</mx:String>
+<mx:String>Prestation de services</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Type" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_type" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.type}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Facture client</mx:String>
+<mx:String>Facture d'avoir client</mx:String>
+<mx:String>Facture accompagnant</mx:String>
+<mx:String>Facture d'avoir accompagnant</mx:String>
+<mx:String>Facture autre</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="N° dossier" width="97%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_projet"  editable="false" width="100%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.projet}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionprojet();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Opération" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:ComboBox id="combo_operation" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.operation}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Facture acompte</mx:String>
+<mx:String>Facture commission</mx:String>
+<mx:String>Facture individuelle acc</mx:String>
+<mx:String>Facture solde</mx:String>
+<mx:String>Facture participant</mx:String>
+<mx:String>Facture totale</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Chef de projet" width="97%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_utilisateur"  editable="false" width="100%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.utilisateur}"   />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionutilisateur();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Date facture" width="100%" labelWidth="120" visible="true" enabled="true" required="true" >
+<mx:DateField id="date_date_facture" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.date_facture}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="N° facture" width="100%" labelWidth="120" visible="true" enabled="true" required="true"  >
+<mx:TextInput id="text_numero" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.numero}" change="cle_facture_client()" />
+</mx:FormItem>
+<mx:FormItem label="Libellé" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_libelle" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.libelle}"  />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="statut" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_statut" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.statut}" >
+<mx:dataProvider>
+<mx:String>En cours</mx:String>
+<mx:String>Terminé</mx:String>
+<mx:String>Annulé</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="ADRESSE FACTURATION"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Référence" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_clt_reference" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.clt_reference}"   />
+</mx:FormItem>
+<mx:FormItem label="Client" width="97%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:HBox width="100%"><mx:VBox width="100%">
+<mx:TextInput id="connexion_societe"  editable="false" width="100%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.societe}"  valueCommit="remplirChampsSociete();" />
+</mx:VBox><mx:VBox width="10%"><mx:Button label="..." click="OpenConnexionsociete();"/></mx:VBox></mx:HBox>
+</mx:FormItem>
+<mx:FormItem label="Contact" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_contact" width="97%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.contact}"   />
+</mx:FormItem>
+<mx:FormItem label="Adresse" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_facturation_adresse1" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.facturation_adresse1}"   />
+</mx:FormItem>
+<mx:FormItem label="Adresse2" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_facturation_adresse2" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.facturation_adresse2}"   />
+</mx:FormItem>
+<mx:FormItem label="CP" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_facturation_cp" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.facturation_cp}"   />
+</mx:FormItem>
+<mx:FormItem label="Ville" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_facturation_ville" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.facturation_ville}"   />
+</mx:FormItem>
+<mx:FormItem label="Pays" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_pays" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.pays}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Délai paiement" width="100%" labelWidth="120"  visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_delai_paiement" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.delai_paiement}"   />
+</mx:FormItem>
+<mx:FormItem label="Pièce jointe" width="95%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj"  width="150"  text="{restfacture_clientRead.lastResult.facture_clientRead.item.pj}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj" click="initFile_pj()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj" label="Ouvrir" click="openNewWindow_pj(event)"/></mx:VBox></mx:HBox></mx:FormItem>
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_client_accompagnant" label="Accompagnant" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="ADRESSE FACTURATION"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Civilité" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_acc_civilite" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_civilite}" >
+<mx:dataProvider>
+<mx:String>Monsieur</mx:String>
+<mx:String>Madame</mx:String>
+<mx:String>Mademoiselle</mx:String>
+<mx:String>Docteur</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Nom et prénom" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_nom" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_nom}"  />
+</mx:FormItem>
+<mx:FormItem label="Adresse" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_facturation_adresse1" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_facturation_adresse1}"  />
+</mx:FormItem>
+<mx:FormItem label="CP" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_facturation_cp" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_facturation_cp}"  />
+</mx:FormItem>
+<mx:FormItem label="Ville" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_facturation_ville" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_facturation_ville}"  />
+</mx:FormItem>
+<mx:FormItem label="Hôpital" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_hop" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_hop}"  />
+</mx:FormItem>
+<mx:FormItem label="Service hospitalier" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_service_hop" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_service_hop}"  />
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text=""  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Référence" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_ref" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_ref}"   />
+</mx:FormItem>
+<mx:FormItem label="Nbre personne(s)" width="100%" labelWidth="120"  visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acc_nb_personne" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_nb_personne}"   />
+</mx:FormItem>
+<mx:FormItem label="Date départ" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_acc_date_depart" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_date_depart}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Date retour" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_acc_date_retour" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_date_retour}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Note" width="100%" height="110" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_acc_note" wordWrap="true" editable="true" height="110" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acc_note}"/>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_client_detail_facturation" label="Détail facturation" width="100%" height="100%" mouseOver="recup_montant();" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddFactureLigne()" id="btn_Add_FactureLigne" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_FactureLigne" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_FactureLigne" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_FactureLigne" width="100%" height="100%" dataProvider="{restFactureLigne.lastResult.facture_client_ligneList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateFactureLigne()"><mx:columns><mx:AdvancedDataGridColumn headerText="Désignation" dataField="designation"/>
+<mx:AdvancedDataGridColumn headerText="Quantité" dataField="qte"/>
+<mx:AdvancedDataGridColumn headerText="Prix unitaire HT" dataField="puht"/>
+<mx:AdvancedDataGridColumn headerText="Total montant HT" dataField="total_montant_ht"/>
+<mx:AdvancedDataGridColumn headerText="Total montant TTC" dataField="total_montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client_ligne" dataField="idfacture_client_ligne" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_client_detail_facturation_ta" label="Détail facturation TA" width="100%" height="100%" mouseOver="recup_montant();" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" paddingTop="0" paddingRight="10">
+<mx:Button label="" click="AddFactureLigneTA()" id="btn_Add_FactureLigneTA" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/ajouter.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Delete_FactureLigneTA" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/supprimer.png')</mx:icon>
+</mx:Button>
+<mx:Button label=""  id="btn_Refresh_FactureLigneTA" borderColor="#FFFFFF">
+<mx:icon>@Embed(source='assets/icones/actualiser.png')</mx:icon>
+</mx:Button>
+</mx:HBox>
+
+<mx:AdvancedDataGrid id="datagrid_FactureLigneTA" width="100%" height="100%" dataProvider="{restFactureLigneTA.lastResult.facture_client_ligneList.item}" doubleClickEnabled="true" itemDoubleClick="UpdateFactureLigneTA()"><mx:columns><mx:AdvancedDataGridColumn headerText="Désignation" dataField="designation"/>
+<mx:AdvancedDataGridColumn headerText="Quantité" dataField="qte"/>
+<mx:AdvancedDataGridColumn headerText="Prix unitaire TTC" dataField="puttc"/>
+<mx:AdvancedDataGridColumn headerText="Total montant TTC" dataField="total_montant_ttc"/>
+<mx:AdvancedDataGridColumn headerText="cle" dataField="cle" visible="false"/>
+<mx:AdvancedDataGridColumn headerText="idfacture_client_ligne" dataField="idfacture_client_ligne" visible="false"/>
+</mx:columns></mx:AdvancedDataGrid>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_client_paiement" label="Paiement" width="100%" height="100%" mouseOver="recup_montant();" >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="FACTURATION"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:FormItem label="Montant HT" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ht" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.montant_ht}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TVA" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_tva" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.montant_tva}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Montant TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_ttc" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.montant_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Note" width="100%" height="50" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:TextArea id="memo_note" wordWrap="true" editable="true" height="50" width="95%"  text="{restfacture_clientRead.lastResult.facture_clientRead.item.note}"/>
+</mx:FormItem>
+<mx:FormItem label="Montant Total TTC" width="100%" labelWidth="120" visible="false" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_montant_total_paiement_ttc" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.montant_total_paiement_ttc}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="TVA" width="100%" labelWidth="120" visible="false" enabled="true" required="false" >
+<mx:ComboBox id="combo_tva" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.tva}" >
+<mx:dataProvider>
+<mx:String>Oui</mx:String>
+<mx:String>Non</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+<mx:FormItem label="Total payé" width="100%" labelWidth="120" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte_regle" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte_regle}"   restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Pourcentage" width="100%" labelWidth="120" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_pourcentage1" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.pourcentage1}" change="calculAccompte();" />
+</mx:FormItem>
+<mx:FormItem label="Acompte" width="100%" labelWidth="120" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte_clt_1" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte_clt_1}" change="calculAccompte();"  restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="120" visible="false" enabled="true" required="false" >
+<mx:DateField id="date_acompte_date1" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte_date1}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Pourcentage" width="100%" labelWidth="120" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_pourcentage2" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.pourcentage2}" change="calculAccompte();" />
+</mx:FormItem>
+<mx:FormItem label="Acompte" width="100%" labelWidth="120" visible="false" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte_clt_2" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte_clt_2}" change="calculAccompte();"  restrict="[0-9.\-]" textAlign="right" />
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="120" visible="false" enabled="true" required="false" >
+<mx:DateField id="date_acompte_date2" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte_date2}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:HBox width="100%" borderSides="bottom" borderStyle="solid" borderColor="#5d5d5d"><mx:Label text="ETAT PAIEMENTS"  fontWeight="bold" textDecoration="normal" width="100%"  enabled="true" color="#5d5d5d" fontSize="11" /></mx:HBox>
+<mx:HBox width="100%"><mx:Label text="Paiement TTC 1"  fontWeight="bold"  width="100%"  enabled="true" color="#000000" fontSize="10" textDecoration="underline" /></mx:HBox>
+<mx:FormItem label="Montant TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte1" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte1}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date1" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.date1}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Justificatif" width="85%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj1"  width="150"  text="{restfacture_clientRead.lastResult.facture_clientRead.item.pj1}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj1" click="initFile_pj1()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj1" label="Ouvrir" click="openNewWindow_pj1(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:HBox width="100%"><mx:Label text="Paiement TTC 2"  fontWeight="bold"  width="100%"  enabled="true" color="#000000" fontSize="10" textDecoration="underline" /></mx:HBox>
+<mx:FormItem label="Montant TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte2" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte2}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date2" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.date2}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Justificatif" width="95%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj2"  width="150"  text="{restfacture_clientRead.lastResult.facture_clientRead.item.pj2}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj2" click="initFile_pj2()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj2" label="Ouvrir" click="openNewWindow_pj2(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:HBox width="100%"><mx:Label text="Paiement TTC 3"  fontWeight="bold"  width="100%"  enabled="true" color="#000000" fontSize="10" textDecoration="underline" /></mx:HBox>
+<mx:FormItem label="Montant TTC" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte3" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte3}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Date" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:DateField id="date_date3" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.date3}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Justificatif" width="95%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:HBox><mx:VBox><mx:TextInput id="fichier_text_pj3"  width="150"  text="{restfacture_clientRead.lastResult.facture_clientRead.item.pj3}" /></mx:VBox><mx:VBox><mx:Button id="btn_parcourir_pj3" click="initFile_pj3()" label="..."/></mx:VBox><mx:VBox><mx:Button  id="btn_ouvrir_pj3" label="Ouvrir" click="openNewWindow_pj3(event)"/></mx:VBox></mx:HBox></mx:FormItem><mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Total paiement" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_acompte_total" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.acompte_total}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Restant dû" width="100%" labelWidth="120" visible="true" enabled="true" required="false"  >
+<mx:TextInput id="text_montant_restant" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.montant_restant}"  restrict="[0-9.\-]" textAlign="right"/>
+</mx:FormItem>
+<mx:FormItem label="Facture" width="100%" labelWidth="120" visible="true" enabled="true" required="false" >
+<mx:ComboBox id="combo_reglee" width="95%"  text="{restfacture_clientRead.lastResult.facture_clientRead.item.reglee}" >
+<mx:dataProvider>
+<mx:String></mx:String>
+<mx:String>Non payée</mx:String>
+<mx:String>Payée</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas><mx:Canvas id="tab_facture_client_systeme" label="Système" width="100%" height="100%"  >
+<mx:Form width="100%" height="100%" borderThickness="0" borderColor="gray" borderStyle="solid" paddingLeft="0" paddingRight="0" paddingTop="0" paddingBottom="0">
+<mx:HBox width="100%" height="100%">
+<mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="cle" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cle" width="95%" text="{restfacture_clientRead.lastResult.facture_clientRead.item.cle}"  />
+</mx:FormItem>
+<mx:FormItem label="Date création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_creation" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.date_creation}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Heure création" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_creation" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.heure_creation}"  />
+</mx:FormItem>
+<mx:FormItem label="Date modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:DateField id="date_date_modification" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.date_modification}"
+formatString="DD/MM/YYYY" firstDayOfWeek="0" dayNames="['D','L','M','M','J','V','S']"	monthNames="['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']" />
+</mx:FormItem>
+<mx:FormItem label="Heure modification" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_heure_modification" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.heure_modification}"  />
+</mx:FormItem>
+<mx:FormItem label="Année" width="100%" labelWidth="120" visible="true" enabled="false" backgroundAlpha="0.0" required="false" >
+<mx:ComboBox id="combo_annee" width="90" text="{restfacture_clientRead.lastResult.facture_clientRead.item.annee}" >
+<mx:dataProvider>
+<mx:String>2011</mx:String>
+<mx:String>2012</mx:String>
+
+</mx:dataProvider>
+</mx:ComboBox>
+</mx:FormItem>
+
+</mx:VBox><mx:VBox width="100%" height="100%" paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0"><mx:FormItem label="idfacture_client" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_idfacture_client" width="50" text="{restfacture_clientRead.lastResult.facture_clientRead.item.idfacture_client}"   />
+</mx:FormItem>
+<mx:FormItem label="Création par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_creation_par" width="150" text="{restfacture_clientRead.lastResult.facture_clientRead.item.creation_par}"   />
+</mx:FormItem>
+<mx:FormItem label="Pays Projet" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+	<mx:TextInput id="text_pays_projet" width="150" text="{restfacture_clientRead.lastResult.facture_clientRead.item.pays_projet}"   />
+</mx:FormItem>
+<mx:HBox width="100%" height="22"></mx:HBox>
+<mx:FormItem label="Modification par" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_modification_par" width="150" text="{restfacture_clientRead.lastResult.facture_clientRead.item.modification_par}"   />
+</mx:FormItem>
+<mx:FormItem label="Cas" width="100%" labelWidth="120"  visible="true" enabled="false" backgroundAlpha="0.0" required="false"  >
+<mx:TextInput id="text_cas" width="150" text="{restfacture_clientRead.lastResult.facture_clientRead.item.cas}"   />
+</mx:FormItem>
+
+</mx:VBox></mx:HBox>
+</mx:Form>
+</mx:Canvas>
+	</mx:TabNavigator>
+</mx:VBox>
+		
+</mx:VDividedBox>
+
+<mx:HBox height="20" width="100%">
+		<mx:Label text="CA HT" />
+		<mx:TextInput width="100" id="textTotalCA_TTC" text="{calcul_total()}"/>
+		<mx:Label text="Total paiement" />
+		<mx:TextInput width="100" id="textTotalAcompte"/>
+		<mx:Button label="Calculer" click="calcul_total()"/>
+		<mx:Button label="Export Excel Honoraires" click="tableau_bord_honoraire()"/>
+		<mx:Label paddingLeft="150" />
+</mx:HBox>
+
+</mx:VBox>
+</mx:Canvas>
+
