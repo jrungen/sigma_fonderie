@@ -5,7 +5,7 @@
 	xmlns:components="com.hillelcoren.components.*"
 	titleIcon="@Embed(source='assets/icones/imprimer.png')" showCloseButton="true" close="fermer();"
 	>
-	
+
 <mx:Script>
 	<![CDATA[
 		import mx.controls.Alert;
@@ -23,7 +23,7 @@
 			restmodele_lettreList.send();
 			//Alert.show(itemId);
 		}
-		
+		// test
 		private function fermer():void {
 			PopUpManager.removePopUp(this);
 		}
